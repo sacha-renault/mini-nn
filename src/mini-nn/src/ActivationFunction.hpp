@@ -26,16 +26,6 @@ public:
     }
 };
 
-class Tanh : public ActivationFunction {
-protected:
-    float _forward(float x) {
-        return (std::exp(x) - std::exp(-x)) / (std::exp(x) + std::exp(-x));
-    }
-    float _backward(float x) {
-        return (1 - std::pow(x, 2));
-    }
-};
-
 class LambdaActivation : public ActivationFunction {
 protected:
     std::function<float(float)> _forward_func;
