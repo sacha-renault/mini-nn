@@ -29,7 +29,7 @@ public:
 
     // Getter / setter
     float getData() const { return data_; }
-    void setGrad(float grad) { grad_ = grad; }
+    void setGrad(float grad) { grad_ += grad; }
     float getGrad() const { return grad_; }
     void setBackward(std::function<void()> func) { backward_ = func; } 
     void clearBackward() { backward_ = nullptr; }
