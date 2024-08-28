@@ -35,3 +35,20 @@ protected:
         return (1 - std::pow(x, 2));
     }
 };
+
+class LambdaActivation : public ActivationFunction {
+protected:
+    std::function<float(float)> _forward_func;
+    std::function<float(float)> _backward_func;
+
+    float _forward(float x) {
+        return _forward_func(x);
+    }
+    float _backward(float x) {
+        return _backward_func(x);
+    } 
+
+public:
+    LambdaActivation(std::function<float(float)> forward, std::function<float(float)> backward)
+        : _forward_func(forward), _backward_func(backward) { }
+};
