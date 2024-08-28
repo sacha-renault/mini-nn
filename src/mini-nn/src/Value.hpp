@@ -2,37 +2,44 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <memory>
 
-enum class Op {
-    add, sub, mul, div 
+struct GradVal {
+    float lgrad;
+    float rgrad;
+    GradVal(float l, float r) : lgrad(l), rgrad(r) { }
 };
 
 class Value {
 protected:
     float data_;
     float grad_;
-    std::vector<Value> childrens_;
-    Op op_;
+    std::vector<Value*> childrens_;
+    std::function<void()> backward_;
+    void _backpropagation();
 
 public:
-    // Constructor
+    // Constructors
     Value(float data) 
-        : data_(data), grad_(0.0f) {}
-    Value(float data, std::vector<Value>& childrens, Op op) 
-        : data_(data), childrens_(childrens), op_(op), grad_(0.0f) {}
+        : data_(data), grad_(0.0f), childrens_() {}
+    // Value(float data, const std::vector<Value*>& children) 
+    //     : data_(data), grad_(0.0f), childrens_(children) {}
+    Value(float data, const std::vector<Value*> children) 
+        : data_(data), grad_(0.0f), childrens_(std::move(children)) {}
 
     // Getter / setter
     float getData() const { return data_; }
     void setGrad(float grad) { grad_ = grad; }
+    float getGrad() const { return grad_; }
+    void setBackward(std::function<void()> func) { backward_ = func; } 
+    void clearBackward() { backward_ = nullptr; }
 
     // public method
     std::string toString() const;
-    Value applyOperator(const Value& other, std::function<float(float, float)> op_func, Op op);
+    Value applyOperator(Value& other, std::function<float(float, float)> op_func);
     void backpropagation();
 
     // operator overload
-    Value operator+(const Value& other);
-    Value operator-(const Value& other);
-    Value operator*(const Value& other);
-    Value operator/(const Value& other);
+    Value operator+(Value& other);
+    Value operator*(Value& other);
 };
