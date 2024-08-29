@@ -43,3 +43,5 @@ public:
     Value operator+(Value& other);
     Value operator*(Value& other);
 };
+
+Value sumManyValue(std::vector<Value*>& others);

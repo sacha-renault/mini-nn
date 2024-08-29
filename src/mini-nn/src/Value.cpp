@@ -54,3 +54,31 @@ void Value::_backpropagation() {
         } 
     }
 }
+
+
+Value sumManyValue(std::vector<Value*>& others) {
+    // Sum all the data from the other values
+    float total = 0.0f;
+    std::vector<Value*> children;
+
+    // Collect all the data and children references
+    for (auto* val : others) {
+        total += val->getData();
+        children.push_back(val); // Add a pointer to each value
+    }
+
+    // Create a new Value object for the sum with the collected children
+    Value result(total, children);
+
+    // Set the backward function to distribute the gradient to all children
+    result.setBackward([&result, children]() {
+        float upperNodeGradient = result.getGrad();
+        for (auto* child : children) {
+            if (child) {
+                child->setGrad(upperNodeGradient);
+            }
+        }
+    });
+
+    return result;
+}
