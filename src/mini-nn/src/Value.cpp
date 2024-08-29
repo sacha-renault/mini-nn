@@ -45,7 +45,6 @@ void Value::backpropagation() {
 void Value::_backpropagation() {
     if (backward_) {
         backward_();
-        clearBackward(); // once backward is called we should delete it.
     }
 
     for (Value* prev : childrens_) {
