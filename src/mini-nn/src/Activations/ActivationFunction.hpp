@@ -5,7 +5,6 @@
 #include "../Values/Value.hpp"
 
 namespace Activations {
-
     class BaseActivation { 
     public:
         virtual std::vector<std::shared_ptr<Value>> operator()(const std::vector<std::shared_ptr<Value>>& inputs)=0;

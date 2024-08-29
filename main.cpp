@@ -93,13 +93,13 @@
 
 
 int main(){
-    Dense l1(5, 5);
+    Layers::Dense l1(5, 5);
     l1.func_ = &Activations::Tanh;
-    Dense l2(5, 5);
+    Layers::Dense l2(5, 5);
     l2.func_ = &Activations::Tanh;
-    Dense l3(5, 5);
+    Layers::Dense l3(5, 5);
     l3.func_ = &Activations::Tanh;
-    Dense l4(5, 1);
+    Layers::Dense l4(5, 1);
     l4.func_ = &Activations::Tanh;
 
     std::vector<std::shared_ptr<Value>> inputs;
