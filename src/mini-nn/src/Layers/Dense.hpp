@@ -3,6 +3,7 @@
 #include <memory>
 #include "Layer.hpp"
 #include "Neuron.hpp"
+#include "../Activations/Static.hpp"
 
 namespace Layers {
     class Dense : public Layer {
@@ -20,46 +21,22 @@ namespace Layers {
             outputs_.resize(num_outputs);  // Pre-allocate space for outputs
         }
 
-        Activations::LambdaActivation *func_;
+        Activations::LambdaActivation *func_ = nullptr;
 
         // Forward pass for the dense layer
-        std::vector<std::shared_ptr<Value>>& forward(std::vector<std::shared_ptr<Value>>& inputs) override {
-            for (size_t i = 0; i < neurons_.size(); ++i) {
-                outputs_[i] = neurons_[i].forward(inputs);  // Store each neuron's output
-            }
+        std::vector<std::shared_ptr<Value>>& forward(std::vector<std::shared_ptr<Value>>& inputs) override;
 
-            if (func_) {
-                outputs_ = (*func_)(outputs_);
-            }
+        /// @brief Backward pass for the dense layer
+        void backward() override;
 
-            return outputs_;
-        }
+        
+        /// @brief Get all parameters (weights) from all neurons in the layer
+        /// @return Tensor of parameters
+        std::vector<std::shared_ptr<Value>> getParameters();
 
-        // Backward pass for the dense layer
-        void backward() override {
-            for (auto& out : outputs_) {
-                out->backward();  // Perform backpropagation for each neuron's output
-            }
-        }
-
-        // Get all parameters (weights and biases) from all neurons in the layer
-        std::vector<std::shared_ptr<Value>> getParameters() override {
-            std::vector<std::shared_ptr<Value>> params;
-            for (auto& neuron : neurons_) {
-                auto weights = neuron.getWeights();  // Get weights of each neuron
-                params.insert(params.end(), weights.begin(), weights.end());
-            }
-            return params;
-        }
-
-        std::vector<std::shared_ptr<Value>> getBiases() {
-            std::vector<std::shared_ptr<Value>> params;
-            for (auto& neuron : neurons_) {
-                auto weights = neuron.getWeights();  // Get weights of each neuron
-                params.push_back(neuron.getBias());
-            }
-            return params;
-        }
+        /// @brief Get all parameters (biases) from all neurons in the layer
+        /// @return Tensor of parameters
+        std::vector<std::shared_ptr<Value>> getBiases();
     };
 }
 

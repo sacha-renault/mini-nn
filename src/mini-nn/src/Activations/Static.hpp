@@ -1,3 +1,4 @@
+#pragma once
 #include "ActivationFunction.hpp"
 
 namespace Activations {
