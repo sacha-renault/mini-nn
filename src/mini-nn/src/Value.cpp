@@ -7,77 +7,95 @@ std::string Value::toString() const {
     return rpr;
 }
 
-Value Value::applyOperator(Value& other, std::function<float(float, float)> op_func) {
-    // Create a vector to hold the children
-    std::vector<Value*> children;
-    children.push_back(this);    // Add `this` as a child
-    children.push_back(&other);  // Add `other` as another child
+std::shared_ptr<Value> Value::applyOperator(const std::shared_ptr<Value>& other, std::function<float(float, float)> op_func) {
+    // Compute the new data value
+    float newData = op_func(data_, other->getData());
+    
+    // Create a new Value object
+    auto result = std::make_shared<Value>(newData);
 
-    // create a new value obj with new childrens
-    return Value(
-        op_func(data_, other.getData()),  
-        children);
+    // Add the current object and `other` as children
+    result->addChild(shared_from_this());
+    result->addChild(other);
+
+    return result;
 }
 
-Value Value::operator+(Value& other) {
-    Value out = applyOperator(other, [](float a, float b) { return a + b; });
-    out.setBackward([&out, &other, this]() { 
-        other.setGrad(out.getGrad());
-        this->setGrad(out.getGrad());
+void Value::backward() {
+    // Initialize the gradient of the highest node to 1.0
+    grad_ = 1.0f;
+    
+    auto sorted_nodes = topologicalSort(shared_from_this());
+    std::reverse(sorted_nodes.begin(), sorted_nodes.end());
+
+    for (auto& node : sorted_nodes) {
+        if (node->backward_) {
+            node->backward_();
+        }
+    }
+}
+
+std::shared_ptr<Value> Value::add(const std::shared_ptr<Value>& other){
+    std::shared_ptr<Value> out = applyOperator(other, [](float a, float b) { return a + b; });
+    out->setBackward([out, other, this]() { 
+        other->accumulateGrad(out->getGrad());
+        this->accumulateGrad(out->getGrad());
     });
     return out;
 }
 
-Value Value::operator*(Value& other) {
-    Value out = applyOperator(other, [](float a, float b) { return a * b; });
-    out.setBackward([&out, &other, this]() { 
-        other.setGrad(out.getGrad() * this->data_);
-        this->setGrad(out.getGrad() * other.getData());
+std::shared_ptr<Value> Value::times(const std::shared_ptr<Value>& other){
+    std::shared_ptr<Value> out = applyOperator(other, [](float a, float b) { return a * b; });
+    out->setBackward([out, other, this]() { 
+        other->accumulateGrad(out->getGrad() * this->data_);
+        this->accumulateGrad(out->getGrad() * other->getData());
     });
     return out;
 }
 
-void Value::backpropagation() {
-    grad_ = 1.0f; // we set the grad to 1 on the last value.
-    _backpropagation();
-}
-
-void Value::_backpropagation() {
-    if (backward_) {
-        backward_();
-    }
-
-    for (Value* prev : childrens_) {
-        if (prev != nullptr) {
-            prev->_backpropagation();
-        } 
-    }
-}
-
-
-Value sumManyValue(std::vector<Value*>& others) {
+std::shared_ptr<Value> sumManyValue(std::vector<std::shared_ptr<Value>>& others) {
     // Sum all the data from the other values
     float total = 0.0f;
-    std::vector<Value*> children;
 
     // Collect all the data and children references
-    for (auto* val : others) {
+    for (auto val : others) {
         total += val->getData();
-        children.push_back(val); // Add a pointer to each value
     }
 
     // Create a new Value object for the sum with the collected children
-    Value result(total, children);
+    auto result = Value::create(total);
+
+    // add other as childs
+    for (auto val : others) {
+        result->addChild(val);
+    }
 
     // Set the backward function to distribute the gradient to all children
-    result.setBackward([&result, children]() {
-        float upperNodeGradient = result.getGrad();
-        for (auto* child : children) {
+    result->setBackward([result, others]() {
+        float upperNodeGradient = result->getGrad();
+        for (auto child : others) {
             if (child) {
-                child->setGrad(upperNodeGradient);
+                child->accumulateGrad(upperNodeGradient);
             }
         }
     });
 
     return result;
+}
+
+std::vector<std::shared_ptr<Value>> topologicalSort(const std::shared_ptr<Value>& root) {
+    std::vector<std::shared_ptr<Value>> sorted;
+    std::unordered_set<std::shared_ptr<Value>> visited;
+
+    std::function<void(const std::shared_ptr<Value>&)> dfs = [&](const std::shared_ptr<Value>& node) {
+        if (visited.count(node)) return;
+        visited.insert(node);
+        for (const auto& child : node->getChildren()) {
+            dfs(child);
+        }
+        sorted.push_back(node);  // Add node to the sorted list after visiting all children
+    };
+
+    dfs(root);
+    return sorted;
 }
