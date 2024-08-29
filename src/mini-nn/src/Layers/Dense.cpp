@@ -6,10 +6,8 @@ namespace Layers
         for (size_t i = 0; i < neurons_.size(); ++i) {
             outputs_[i] = neurons_[i].forward(inputs);  // Store each neuron's output
         }
-
-        if (func_) {
-            outputs_ = (*func_)(outputs_);
-        }
+        
+        outputs_ = func_(outputs_);
 
         return outputs_;
     }

@@ -51,7 +51,7 @@ namespace Activations {
         }
     };
 
-    class ActivationFunctionVectorLambda : public BaseActivation {
+    class LambdaActivationVector : public BaseActivation {
     protected:
         std::function<std::vector<float>(const std::vector<float>& x)> _forward_func;
         std::function<std::vector<float>(const std::vector<float>& x)> _backward_func;
@@ -64,7 +64,7 @@ namespace Activations {
         }
 
     public:
-        ActivationFunctionVectorLambda(
+        LambdaActivationVector(
             std::function<std::vector<float>(const std::vector<float>& x)> forward,
             std::function<std::vector<float>(const std::vector<float>& x)> backward)
             : _forward_func(forward), _backward_func(backward) { }

@@ -21,7 +21,7 @@ namespace Activations {
     );
 
     // Softmax activation function
-    static ActivationFunctionVectorLambda Softmax(
+    static LambdaActivationVector Softmax(
         // Forward function
         [](const std::vector<float>& x) -> std::vector<float> {
             std::vector<float> exp_x(x.size());
