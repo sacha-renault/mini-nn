@@ -16,7 +16,7 @@ public:
     Neuron(size_t num_inputs) : output_(Value::create(0.0f)) {
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> dist(0.1f, 0.1f);
+        std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
 
         for (size_t i = 0; i < num_inputs; ++i) {
             wi_.emplace_back(Value::create(dist(gen)));  // Initialize weights
@@ -58,6 +58,6 @@ public:
 
     // Getters
     std::vector<std::shared_ptr<Value>>& getWeights() { return wi_; }
-    std::shared_ptr<Value> getBias() { return bias_; }
-    std::shared_ptr<Value> getOutput() { return output_; }
+    std::shared_ptr<Value>& getBias() { return bias_; }
+    std::shared_ptr<Value>& getOutput() { return output_; }
 };
