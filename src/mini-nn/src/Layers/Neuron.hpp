@@ -1,9 +1,8 @@
-// Neuron.hpp
 #pragma once
 #include <vector>
 #include <memory>
 #include <random>
-#include "Value.hpp"  // Ensure you include the updated Value class
+#include "../Values/Value.hpp"  // Ensure you include the updated Value class
 
 class Neuron {
 private:

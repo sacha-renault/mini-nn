@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
-#include "../Value.hpp"
-#include "../Parameter.hpp"
+#include "../Values/Value.hpp"
+#include "../Values/Parameter.hpp"
 
 class Layer {
 public:

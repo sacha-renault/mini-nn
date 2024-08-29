@@ -2,7 +2,7 @@
 #include <vector>
 #include <memory>
 #include "Layer.hpp"
-#include "../Neuron.hpp"
+#include "Neuron.hpp"
 
 class Dense : public Layer {
 private:
