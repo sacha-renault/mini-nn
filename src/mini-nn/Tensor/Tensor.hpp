@@ -10,68 +10,35 @@ private:
     Eigen::Index total_size_;
 
     // private function to compute the 1D index from ND index
-    Eigen::Index computeIndex(const std::vector<Eigen::Index>& indices) const {
-        Eigen::Index index = 0;
-        Eigen::Index multiplier = 1;
-        for (int i = dimensions_.size() - 1; i >= 0; --i) {
-            index += indices[i] * multiplier;
-            multiplier *= dimensions_[i];
-        }
-        return index;
-    }
+    Eigen::Index computeIndex(const std::vector<Eigen::Index>& indices) const;
 
 public:
     Tensor() {};
 
-    // Constructor that accepts dimensions
-    Tensor(const std::vector<Eigen::Index>& dims)
-        : dimensions_(dims), total_size_(1) {
-        for (const auto& dim : dimensions_) {
-            total_size_ *= dim;
-        }
-        data_.resize(total_size_);
-    }
+    Tensor(const std::vector<Eigen::Index>& dims);
 
-    // Access element by multi-dimensional indices
-    std::shared_ptr<Value>& operator()(const std::vector<Eigen::Index>& indices) {
-        return data_(computeIndex(indices));
-    }
-    const std::shared_ptr<Value>& operator()(const std::vector<Eigen::Index>& indices) const {
-        return data_(computeIndex(indices));
-    }
+    std::shared_ptr<Value>& operator()(const std::vector<Eigen::Index>& indices);
 
-    // Fill tensor with a specific value
-    void fill(const std::shared_ptr<Value>& value) {
-        data_.setConstant(value);
-    }
+    const std::shared_ptr<Value>& operator()(const std::vector<Eigen::Index>& indices) const;
 
-    // Get the underlying Eigen::Matrix
-    const Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>& data() const {
-        return data_;
-    }
+    void fill(const std::shared_ptr<Value>& value);
 
-    // Get the rank
-    int rank() const { return dimensions_.size(); }
+    const Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>& data() const;
 
-    // Get dimensions of the tensor
-    std::vector<Eigen::Index> dim() const {
-        return dimensions_;
-    }
+    int rank() const;
 
-    Eigen::Index size() const {
-        return data_.size();
-    }
+    std::vector<Eigen::Index> dim() const;
 
-    // Display tensor for debugging
-    void display() const {
-        std::cout << "Tensor: ";
-        for (int i = 0; i < data_.size(); ++i) {
-            std::cout << data_.data()[i]->getData() << " ";  // Assuming Value has a get() method
-        }
-        std::cout << std::endl;
-    }
+    Eigen::Index size() const;
+
+    void reshape(const std::vector<Eigen::Index>& new_dims);
+
+    void flatten();
+
+    void display() const;
 
     // FOR ITERATOR
+
     auto begin() { return data_.data(); }
     auto end() { return data_.data() + data_.size(); }
     auto begin() const { return data_.data(); }

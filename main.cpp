@@ -104,8 +104,7 @@ int main(){
         inputs({i}) = Value::create(1.0f);
     }
 
-    Tensor x;
-    
+    Tensor x;  
 
     x = l1.forward(inputs);
     x = l2.forward(x);
