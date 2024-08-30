@@ -8,5 +8,10 @@ namespace Math
     /// @param tensor 
     /// @return ptr on the sum
     std::shared_ptr<Value> reduceSum(Tensor& tensor);
+    
+    /// @brief raise a tensor to a desired power (elementwise)
+    /// @param tensor 
+    /// @return a Tensor of
+    Tensor pow(Tensor& tensor, int exponent);
 
 } // namespace Math

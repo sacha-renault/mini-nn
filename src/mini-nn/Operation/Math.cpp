@@ -28,6 +28,27 @@ namespace Math
                 }
             }
         });
+        return result;
+    }
+
+
+    Tensor pow(Tensor& tensor, int exponent) {
+        Tensor result(tensor.dim());
+
+        for (int i = 0; i < tensor.size(); ++i) {
+            float base_value = tensor({i})->getData();
+            float pow_value = std::pow(base_value, exponent);
+
+            auto new_value = std::make_shared<Value>(pow_value);
+
+            // Backward pass (for autograd)
+            new_value->addChild(tensor({i}));
+            new_value->setBackward([tensor_data = tensor({i}), base_value, exponent]() {
+                float gradient = exponent * std::pow(base_value, exponent - 1);
+                tensor_data->accumulateGrad(gradient * tensor_data->getGrad());
+            });
+            result({i}) = new_value;
+        }
 
         return result;
     }
