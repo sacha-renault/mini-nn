@@ -53,36 +53,6 @@ std::shared_ptr<Value> Value::times(const std::shared_ptr<Value>& other){
     return out;
 }
 
-std::shared_ptr<Value> sumManyValue(std::vector<std::shared_ptr<Value>>& others) {
-    // Sum all the data from the other values
-    float total = 0.0f;
-
-    // Collect all the data and children references
-    for (auto val : others) {
-        total += val->getData();
-    }
-
-    // Create a new Value object for the sum with the collected children
-    auto result = Value::create(total);
-
-    // add other as childs
-    for (auto val : others) {
-        result->addChild(val);
-    }
-
-    // Set the backward function to distribute the gradient to all children
-    result->setBackward([result, others]() {
-        float upperNodeGradient = result->getGrad();
-        for (auto child : others) {
-            if (child) {
-                child->accumulateGrad(upperNodeGradient);
-            }
-        }
-    });
-
-    return result;
-}
-
 std::vector<std::shared_ptr<Value>> topologicalSort(const std::shared_ptr<Value>& root) {
     std::vector<std::shared_ptr<Value>> sorted;
     std::unordered_set<std::shared_ptr<Value>> visited;

@@ -3,13 +3,15 @@
 #include <memory>
 #include <random>
 #include "../Values/Value.hpp" 
-#include "../Values/Tensor.hpp" 
+#include "../Tensor/Tensor.hpp" 
+#include "../Math/Operation.hpp"
 
 class Neuron {
 private:
-    Tensor<1> wi_;  // Using shared_ptr for weights
-    Tensor<1> xiwi_;     // Using shared_ptr for xiwi output
+    Tensor wi_;  // Using shared_ptr for weights
+    Tensor xiwi_;     // Using shared_ptr for xiwi output
     std::shared_ptr<Value> bias_;                  // Using shared_ptr for bias
+    std::shared_ptr<Value> xnwn_;                  // result of the sum of all xiwi
     std::shared_ptr<Value> output_;                // Using shared_ptr for output
 
 public:
@@ -27,15 +29,12 @@ public:
             wi_({i}) = Value::create(dist(gen));
         }
 
-        // Resize xiwi_ to match the number of inputs
-        xiwi_.resize({num_inputs});
-
         // Create the bias point
         bias_ = Value::create(dist(gen));  // Initialize bias
     }
 
     // Forward pass
-    std::shared_ptr<Value>& forward(const Tensor<1>& xi) {
+    std::shared_ptr<Value>& forward(const Tensor& xi) {
         // First assert that Tensor is rank one
         if (xi.rank() != 1) {
             throw std::invalid_argument("Input dim must be 1 for Neuron.");
@@ -46,17 +45,16 @@ public:
             throw std::invalid_argument("Input size must match the number of weights.");
         }
 
-
         // Compute the weighted inputs  by iterating over axis 0;
         for (int i = 0; i < xi.dim()[0]; ++i) {
             xiwi_({i}) = xi({i})->times(wi_({i}));
         }
 
         // Sum all weighted inputs and add bias
-        auto weighted_sum = xiwi_.sum();
+        xnwn_ = Operation::reduceSum(xiwi_);
 
         // Add bias
-        output_ = weighted_sum->add(bias_);  // Set output
+        output_ = xnwn_->add(bias_);  // Set output
         return output_;
     }
 
@@ -68,7 +66,7 @@ public:
     // }
 
     // Getters
-    Tensor<1>& getWeights() { return wi_; }
+    Tensor& getWeights() { return wi_; }
     std::shared_ptr<Value>& getBias() { return bias_; }
     std::shared_ptr<Value>& getOutput() { return output_; }
 };

@@ -4,7 +4,7 @@
 #include "src/mini-nn/Activations/Static.hpp"
 #include "src/mini-nn/Layers/Neuron.hpp"
 #include "src/mini-nn/Layers/Dense.hpp"
-#include "src/mini-nn/Values/Tensor.hpp"
+#include "src/mini-nn/Tensor/Tensor.hpp"
 
 // int main(){
 //     auto a = Value::create(2);
@@ -94,17 +94,17 @@
 
 
 int main(){
-    Layers::Dense l1(5, 5, Activations::Tanh);
+    Layers::Dense l1(5, 5);
     Layers::Dense l2(5, 5, Activations::Tanh);
     Layers::Dense l3(5, 5, Activations::Tanh);
     Layers::Dense l4(5, 1, Activations::Sigmoid);
 
-    Tensor<1> inputs({ 5 });
+    Tensor inputs({ 5 });
     for (int i = 0 ; i < 5 ; ++i){
         inputs({i}) = Value::create(1.0f);
     }
 
-    Tensor<1> x;
+    Tensor x;
     
 
     x = l1.forward(inputs);

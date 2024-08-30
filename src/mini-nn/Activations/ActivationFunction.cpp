@@ -19,10 +19,10 @@ namespace Activations {
     }
 
     /// @brief Element wise activation
-    /// @param input Tensor1D
+    /// @param input Tensor
     /// @return output tensor 
-    Tensor1D ElementWiseActivation::operator()(const Tensor1D& inputs) {
-        Tensor1D outputs(inputs.dimensions());  // Create a tensor with the same dimensions as inputs
+    Tensor ElementWiseActivation::operator()(const Tensor& inputs) {
+        Tensor outputs(inputs.dim());  // Create a tensor with the same dimensions as inputs
 
         for (int i = 0; i < inputs.size(); ++i) {
             outputs({i}) = (*this)(inputs({i}));  // Apply the forward operation on each element
@@ -31,41 +31,7 @@ namespace Activations {
         return outputs;
     }
 
-    /// @brief Element wise activation
-    /// @param input Tensor
-    /// @return output tensor 
-    template<typename TensorType>
-    TensorType ElementWiseActivation::operator()(const TensorType& inputs) {
-        // Save the original shape
-        auto original_shape = inputs.dimensions();
-
-        // Prepare a new shape for (n, 1, 1, ...)
-        std::array<Eigen::Index, TensorType::Rank> reshaped_dims;
-        reshaped_dims.fill(1);
-        reshaped_dims[0] = inputs.size();  // Set the first dimension to n
-
-        // Reshape the inputs to (n, 1, 1, ...)
-        TensorType reshaped_inputs = inputs;
-        reshaped_inputs.resize(reshaped_dims);
-
-        // Initialize the output tensor with the reshaped dimensions
-        TensorType reshaped_outputs(reshaped_dims);
-
-        // Loop over the first dimension (n)
-        for (int i = 0; i < reshaped_inputs.size(); ++i) {
-            std::array<Eigen::Index, TensorType::Rank> index = {};
-            index.fill(1);
-            index[0] = i;
-
-            reshaped_outputs(index) = (*this)(reshaped_inputs(index));
-        }
-
-        // Reshape the output tensor back to the original shape
-        reshaped_outputs.resize(original_shape);
-        return reshaped_outputs;
-    }
-
-    Tensor1D Tensor1DWiseActivation::operator()(const Tensor1D& inputs) {
+    Tensor TensorWiseActivation::operator()(const Tensor& inputs) {
         // Convert input Values to raw float data
         std::vector<float> x(inputs.size());
         for (int i = 0; i < inputs.size(); ++i) {
@@ -76,7 +42,7 @@ namespace Activations {
         std::vector<float> out = _forward_func(x);
 
         // Initialize outputs
-        Tensor1D outputs(inputs.dimensions());
+        Tensor outputs(inputs.dim());
         for (int i = 0; i < out.size(); ++i) {
             auto val = std::make_shared<Value>(out[i]);
 
