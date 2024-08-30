@@ -25,9 +25,9 @@ namespace Layers {
             outputs_.resize({num_outputs});  // Pre-allocate space for outputs
         }
 
-        Dense(int num_inputs, int num_outputs, TensorWiseActivation func) 
+        Dense(int num_inputs, int num_outputs, Tensor1DWiseActivation func) 
             :  Dense(num_inputs, num_outputs) {
-                func_ = ActivationWrapper(std::make_shared<TensorWiseActivation>(func));
+                func_ = ActivationWrapper(std::make_shared<Tensor1DWiseActivation>(func));
             }
         
         Dense(int num_inputs, int num_outputs, ElementWiseActivation func) 

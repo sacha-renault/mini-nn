@@ -19,7 +19,6 @@ public:
     std::shared_ptr<Value>& operator()(const std::array<Eigen::Index, Rank>& indices) {
         return data_(indices);
     }
-
     const std::shared_ptr<Value>& operator()(const std::array<Eigen::Index, Rank>& indices) const {
         return data_(indices);
     }

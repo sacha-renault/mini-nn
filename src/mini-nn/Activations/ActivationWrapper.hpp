@@ -18,7 +18,7 @@ public:
         : activation_(lambdaActivation) {}
 
     // Constructor to initialize with ActivationFunctionVectorLambda
-    ActivationWrapper(const std::shared_ptr<TensorWiseActivation>& vectorLambdaActivation)
+    ActivationWrapper(const std::shared_ptr<Tensor1DWiseActivation>& vectorLambdaActivation)
         : activation_(vectorLambdaActivation) {}
 
     // Function call operator to handle single input
@@ -42,8 +42,8 @@ public:
                 return (*lambdaActivation)(inputs);
             }
 
-            // Use dynamic_cast to check if it is TensorWiseActivation
-            auto vectorLambdaActivation = std::dynamic_pointer_cast<TensorWiseActivation>(activation_);
+            // Use dynamic_cast to check if it is Tensor1DWiseActivation
+            auto vectorLambdaActivation = std::dynamic_pointer_cast<Tensor1DWiseActivation>(activation_);
             if (vectorLambdaActivation) {
                 return (*vectorLambdaActivation)(inputs);
             }
