@@ -51,8 +51,5 @@ public:
     // Backward pass initialization
     void backward();
     void zeroGrad();
-
-protected:
-    // Internal method for recursive backpropagation
-    void _backpropagation();
+    void derefGraph();
 };

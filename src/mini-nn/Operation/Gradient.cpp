@@ -2,7 +2,7 @@
 
 namespace Gradient
 {
-    std::vector<std::shared_ptr<Value>> getReverseTopologicalSort(const std::shared_ptr<Value>& root) {
+    std::vector<std::shared_ptr<Value>> getGraphNodes(const std::shared_ptr<Value>& root) {
         std::vector<std::shared_ptr<Value>> sorted;
         std::unordered_set<std::shared_ptr<Value>> visited;
 
@@ -18,5 +18,36 @@ namespace Gradient
         dfs(root);
         std::reverse(sorted.begin(), sorted.end());
         return std::move(sorted);
+    }
+
+    std::vector<std::shared_ptr<Value>> getGraphNodes(Tensor& output) {
+        if (output.size() != 1) {
+            auto rootNode = Math::reduceSum(output);
+            return getGraphNodes(rootNode);
+        } else {
+            return getGraphNodes(output({0}));
+        }
+    }
+
+
+    void backward(std::vector<std::shared_ptr<Value>> gradientNodes) {
+        gradientNodes[0]->accumulateGrad(1.0f); // root node must be 0
+        for (auto node: gradientNodes) {
+            node->backward();
+        }
+    }
+
+
+    void zeroGrad(std::vector<std::shared_ptr<Value>>& gradientNodes) {
+        for (auto node : gradientNodes){
+            node->zeroGrad();
+        }
+    }
+
+
+    void derefGraph(std::vector<std::shared_ptr<Value>>& gradientNodes) {
+        for (auto node : gradientNodes){
+            node->derefGraph();
+        }
     }
 } // namespace Gradient

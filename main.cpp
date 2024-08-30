@@ -5,6 +5,7 @@
 #include "src/mini-nn/Layers/Neuron.hpp"
 #include "src/mini-nn/Layers/Dense.hpp"
 #include "src/mini-nn/Tensor/Tensor.hpp"
+#include "src/mini-nn/Operation/Gradient.hpp"
 
 // int main(){
 //     auto a = Value::create(2);
@@ -108,7 +109,9 @@ int main(){
     x = l3.forward(x);
     x = l4.forward(x);
 
-    l4.backward();
+    auto grad = Gradient::getGraphNodes(x);
+    Gradient::backward(grad);
+    Gradient::zeroGrad(grad);
 
     std::cout << "Input Weight" << std::endl;
     for (auto val : inputs){

@@ -23,15 +23,8 @@ std::shared_ptr<Value> Value::applyOperator(const std::shared_ptr<Value>& other,
 }
 
 void Value::backward() {
-    // Initialize the gradient of the highest node to 1.0
-    grad_ = 1.0f;
-    
-    auto nodes = Gradient::getReverseTopologicalSort(shared_from_this());
-
-    for (auto& node : nodes) {
-        if (node->backward_) {
-            node->backward_();
-        }
+    if (backward_) {
+        backward_();
     }
 }
 
@@ -51,4 +44,15 @@ std::shared_ptr<Value> Value::times(const std::shared_ptr<Value>& other){
         this->accumulateGrad(out->getGrad() * other->getData());
     });
     return out;
+}
+
+void Value::derefGraph() {
+    backward_ = nullptr; // deref the lambda function and free memory
+    zeroGrad();
+    children_.clear();  // clean all refs to child, since it's share_ptr, 
+                        // any shared_ptr that doesn't have owner will be free
+}
+
+void Value::zeroGrad() {
+    grad_ = 0.0f;
 }
