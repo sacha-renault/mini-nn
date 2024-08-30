@@ -12,7 +12,7 @@ class Value : public std::enable_shared_from_this<Value> {
 protected:
     float data_;
     float grad_;
-    std::vector<std::shared_ptr<Value>> children_; // Children of the current Value in the computational graph
+    std::unordered_set<std::shared_ptr<Value>> children_; // Children of the current Value in the computational graph
     std::function<void()> backward_;               // Backward function for backpropagation
 
 public:
@@ -27,7 +27,10 @@ public:
     // Getter for data and gradient
     float getData() const { return data_; }
     float getGrad() const { return grad_; }
-    std::vector<std::shared_ptr<Value>>& getChildren() { return children_; }
+    std::unordered_set<std::shared_ptr<Value>>& getChildren() { return children_; }
+    void updateData(float stepSize) { 
+        data_ -= grad_ * stepSize; 
+    }
 
     // Setter for gradient
     void accumulateGrad(float grad) { grad_ += grad; }
@@ -37,7 +40,7 @@ public:
 
     // Add a child
     void addChild(const std::shared_ptr<Value>& child) {
-        children_.push_back(child);
+        children_.insert(child);
     }
 
     // String representation for debugging
