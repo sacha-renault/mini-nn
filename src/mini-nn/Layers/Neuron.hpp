@@ -4,7 +4,7 @@
 #include <random>
 #include "../Values/Value.hpp" 
 #include "../Tensor/Tensor.hpp" 
-#include "../Math/Operation.hpp"
+#include "../Operation/Math.hpp"
 
 class Neuron {
 private:
@@ -48,7 +48,7 @@ public:
         }
 
         // Sum all weighted inputs and add bias
-        xnwn_ = Operation::reduceSum(xiwi_);
+        xnwn_ = Math::reduceSum(xiwi_);
 
         // Add bias
         output_ = xnwn_->add(bias_);  // Set output

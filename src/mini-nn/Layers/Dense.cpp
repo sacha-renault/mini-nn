@@ -18,7 +18,7 @@ namespace Layers
             outputs_({0})->backward();
         } 
         else { // Case there isn't a single element, we sum first to start backprop on a single node
-            auto node = Operation::reduceSum(outputs_);
+            auto node = Math::reduceSum(outputs_);
             node->backward();
         }
     }

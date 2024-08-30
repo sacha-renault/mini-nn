@@ -53,6 +53,9 @@ std::shared_ptr<Value> Value::times(const std::shared_ptr<Value>& other){
     return out;
 }
 
+/// @brief Get all the node sorted in topoligical order
+/// @param root output node
+/// @return unaccumulated gradient
 std::vector<std::shared_ptr<Value>> topologicalSort(const std::shared_ptr<Value>& root) {
     std::vector<std::shared_ptr<Value>> sorted;
     std::unordered_set<std::shared_ptr<Value>> visited;

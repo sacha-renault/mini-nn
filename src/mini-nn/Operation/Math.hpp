@@ -2,7 +2,7 @@
 #include <memory>
 #include "../Tensor/Tensor.hpp"
 
-namespace Operation
+namespace Math
 {
     inline std::shared_ptr<Value> reduceSum(Tensor& others) {
         // Sum all the data from the other values
@@ -33,4 +33,4 @@ namespace Operation
 
         return result;
     }
-} // namespace Operation
+} // namespace Math
