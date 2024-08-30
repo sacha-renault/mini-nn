@@ -46,7 +46,9 @@ public:
     // Apply a binary operator and create a new Value object
     std::shared_ptr<Value> applyOperator(const std::shared_ptr<Value>& other, std::function<float(float, float)> op_func);
     std::shared_ptr<Value> add(const std::shared_ptr<Value>& other);
+    std::shared_ptr<Value> sub(const std::shared_ptr<Value>& other);
     std::shared_ptr<Value> times(const std::shared_ptr<Value>& other);
+    std::shared_ptr<Value> div(const std::shared_ptr<Value>& other);
 
     // Backward pass initialization
     void backward();

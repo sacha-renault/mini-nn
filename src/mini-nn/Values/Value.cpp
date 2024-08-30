@@ -46,6 +46,26 @@ std::shared_ptr<Value> Value::times(const std::shared_ptr<Value>& other){
     return out;
 }
 
+std::shared_ptr<Value> Value::sub(const std::shared_ptr<Value>& other) {
+    std::shared_ptr<Value> out = applyOperator(other, [](float a, float b) { return a - b; });
+    out->setBackward([out, other, this]() { 
+        other->accumulateGrad(-out->getGrad()); // Negative gradient for subtraction
+        this->accumulateGrad(out->getGrad());
+    });
+    return out;
+}
+
+std::shared_ptr<Value> Value::div(const std::shared_ptr<Value>& other) {
+    std::shared_ptr<Value> out = applyOperator(other, [](float a, float b) { return a / b; });
+    out->setBackward([out, other, this]() { 
+        other->accumulateGrad(-out->getGrad() * this->data_ / (other->getData() * other->getData()));
+        this->accumulateGrad(out->getGrad() / other->getData());
+    });
+    return out;
+}
+
+
+
 void Value::derefGraph() {
     backward_ = nullptr; // deref the lambda function and free memory
     zeroGrad();
