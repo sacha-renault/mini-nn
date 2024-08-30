@@ -9,9 +9,16 @@ namespace Math
     /// @return ptr on the sum
     std::shared_ptr<Value> reduceSum(Tensor& tensor);
     
+
+    /// @brief raise a Value to a desired power
+    /// @param tensor 
+    /// @return tensor
+    std::shared_ptr<Value> pow(std::shared_ptr<Value> base, int exponent);
+
+
     /// @brief raise a tensor to a desired power (elementwise)
     /// @param tensor 
-    /// @return a Tensor of
+    /// @return tensor
     Tensor pow(Tensor& tensor, int exponent);
 
 } // namespace Math

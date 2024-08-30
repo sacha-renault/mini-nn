@@ -19,7 +19,7 @@ namespace Gradient
 
     /// @brief Propagate the gradient through all the graph
     /// @param all the nodes of the computional graph
-    void backward(std::vector<std::shared_ptr<Value>> gradientNodes);
+    void backward(std::vector<std::shared_ptr<Value>>& gradientNodes);
 
 
     /// @brief reset the gradient of all nodes to 0.0;

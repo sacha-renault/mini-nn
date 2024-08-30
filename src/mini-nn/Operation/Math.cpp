@@ -32,24 +32,28 @@ namespace Math
     }
 
 
+    std::shared_ptr<Value> pow(std::shared_ptr<Value> base, int exponent) {
+        float base_value = base->getData();
+        float pow_value = std::pow(base_value, exponent);
+
+        auto result = Value::create(pow_value);
+
+        // Backward pass (for autograd)
+        result->addChild(base);
+        result->setBackward([base, base_value, exponent, result]() {
+            float gradient = exponent * std::pow(base_value, exponent - 1);
+            base->accumulateGrad(gradient * result->getGrad());
+        });
+
+        return std::move(result);
+    }
+
+
     Tensor pow(Tensor& tensor, int exponent) {
         Tensor result(tensor.dim());
-
         for (int i = 0; i < tensor.size(); ++i) {
-            float base_value = tensor({i})->getData();
-            float pow_value = std::pow(base_value, exponent);
-
-            auto new_value = std::make_shared<Value>(pow_value);
-
-            // Backward pass (for autograd)
-            new_value->addChild(tensor({i}));
-            new_value->setBackward([tensor_data = tensor({i}), base_value, exponent]() {
-                float gradient = exponent * std::pow(base_value, exponent - 1);
-                tensor_data->accumulateGrad(gradient * tensor_data->getGrad());
-            });
-            result({i}) = new_value;
+            result({i}) = pow(tensor({i}), exponent);
         }
-
         return result;
     }
 } // namespace Math

@@ -30,7 +30,7 @@ namespace Gradient
     }
 
 
-    void backward(std::vector<std::shared_ptr<Value>> gradientNodes) {
+    void backward(std::vector<std::shared_ptr<Value>>& gradientNodes) {
         gradientNodes[0]->accumulateGrad(1.0f); // root node must be 0
         for (auto node: gradientNodes) {
             node->backward();
