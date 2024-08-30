@@ -99,7 +99,7 @@ int main(){
     Layers::Dense l3(5, 5, Activations::Tanh);
     Layers::Dense l4(5, 1, Activations::Sigmoid);
 
-    Tensor inputs = Tensor::randn({ 5 }, 0, 0.1);
+    Tensor inputs = Tensor::random({ 5 }, 0, 1);
 
     Tensor x;  
 

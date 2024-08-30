@@ -56,11 +56,3 @@ protected:
     // Internal method for recursive backpropagation
     void _backpropagation();
 };
-
-
-/// @brief Sum a vector a values
-/// @param others  
-/// @return a shared_ptr on a new value that represent the sum of others
-std::shared_ptr<Value> sumManyValue(std::vector<std::shared_ptr<Value>>& others);
-
-std::vector<std::shared_ptr<Value>> topologicalSort(const std::shared_ptr<Value>& root);

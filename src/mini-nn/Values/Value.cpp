@@ -1,4 +1,5 @@
 #include "Value.hpp"
+#include "../Operation/Gradient.hpp"
 
 std::string Value::toString() const {
     std::string rpr = "<Value=" + std::to_string(data_); // data value
@@ -25,10 +26,9 @@ void Value::backward() {
     // Initialize the gradient of the highest node to 1.0
     grad_ = 1.0f;
     
-    auto sorted_nodes = topologicalSort(shared_from_this());
-    std::reverse(sorted_nodes.begin(), sorted_nodes.end());
+    auto nodes = Gradient::getReverseTopologicalSort(shared_from_this());
 
-    for (auto& node : sorted_nodes) {
+    for (auto& node : nodes) {
         if (node->backward_) {
             node->backward_();
         }
@@ -51,24 +51,4 @@ std::shared_ptr<Value> Value::times(const std::shared_ptr<Value>& other){
         this->accumulateGrad(out->getGrad() * other->getData());
     });
     return out;
-}
-
-/// @brief Get all the node sorted in topoligical order
-/// @param root output node
-/// @return unaccumulated gradient
-std::vector<std::shared_ptr<Value>> topologicalSort(const std::shared_ptr<Value>& root) {
-    std::vector<std::shared_ptr<Value>> sorted;
-    std::unordered_set<std::shared_ptr<Value>> visited;
-
-    std::function<void(const std::shared_ptr<Value>&)> dfs = [&](const std::shared_ptr<Value>& node) {
-        if (visited.count(node)) return;
-        visited.insert(node);
-        for (const auto& child : node->getChildren()) {
-            dfs(child);
-        }
-        sorted.push_back(node);  // Add node to the sorted list after visiting all children
-    };
-
-    dfs(root);
-    return sorted;
 }
