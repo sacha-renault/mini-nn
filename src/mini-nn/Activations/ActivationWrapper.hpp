@@ -6,26 +6,26 @@ namespace Activations {
 
 class ActivationWrapper {
 private:
-    // Pointer to hold either ActivationFunctionVectorLambda or LambdaActivation
+    // Pointer to hold either ActivationFunctionVectorLambda or ElementWiseActivation
     std::shared_ptr<BaseActivation> activation_;
 
 public:
     // Default constructor - does nothing
     ActivationWrapper() : activation_(nullptr) {}
 
-    // Constructor to initialize with LambdaActivation
-    ActivationWrapper(const std::shared_ptr<LambdaActivation>& lambdaActivation)
+    // Constructor to initialize with ElementWiseActivation
+    ActivationWrapper(const std::shared_ptr<ElementWiseActivation>& lambdaActivation)
         : activation_(lambdaActivation) {}
 
     // Constructor to initialize with ActivationFunctionVectorLambda
-    ActivationWrapper(const std::shared_ptr<LambdaActivationVector>& vectorLambdaActivation)
+    ActivationWrapper(const std::shared_ptr<TensorWiseActivation>& vectorLambdaActivation)
         : activation_(vectorLambdaActivation) {}
 
     // Function call operator to handle single input
     std::shared_ptr<Value> operator()(const std::shared_ptr<Value>& input) {
         if (activation_) {
-            // Use dynamic_cast to check if it is LambdaActivation
-            auto lambdaActivation = std::dynamic_pointer_cast<LambdaActivation>(activation_);
+            // Use dynamic_cast to check if it is ElementWiseActivation
+            auto lambdaActivation = std::dynamic_pointer_cast<ElementWiseActivation>(activation_);
             if (lambdaActivation) {
                 return (*lambdaActivation)(input);
             }
@@ -34,16 +34,16 @@ public:
     }
 
     // Function call operator to handle multiple inputs
-    std::vector<std::shared_ptr<Value>> operator()(const std::vector<std::shared_ptr<Value>>& inputs) {
+    Tensor1D operator()(const Tensor1D& inputs) {
         if (activation_) {
-            // Use dynamic_cast to check if it is LambdaActivation
-            auto lambdaActivation = std::dynamic_pointer_cast<LambdaActivation>(activation_);
+            // Use dynamic_cast to check if it is ElementWiseActivation
+            auto lambdaActivation = std::dynamic_pointer_cast<ElementWiseActivation>(activation_);
             if (lambdaActivation) {
                 return (*lambdaActivation)(inputs);
             }
 
-            // Use dynamic_cast to check if it is LambdaActivationVector
-            auto vectorLambdaActivation = std::dynamic_pointer_cast<LambdaActivationVector>(activation_);
+            // Use dynamic_cast to check if it is TensorWiseActivation
+            auto vectorLambdaActivation = std::dynamic_pointer_cast<TensorWiseActivation>(activation_);
             if (vectorLambdaActivation) {
                 return (*vectorLambdaActivation)(inputs);
             }

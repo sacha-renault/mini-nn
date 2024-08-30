@@ -2,15 +2,19 @@
 #include <cmath>
 #include <algorithm>
 #include <numeric>
+#include <memory>
+#include <vector>
 #include "../Values/Value.hpp"
+#include "../Values/Tensor.hpp"
 
 namespace Activations {
+
     class BaseActivation { 
     public:
-        virtual std::vector<std::shared_ptr<Value>> operator()(const std::vector<std::shared_ptr<Value>>& inputs)=0;
+        virtual Tensor1D operator()(const Tensor1D& inputs) = 0;
     };
 
-    class LambdaActivation : public BaseActivation {
+    class ElementWiseActivation : public BaseActivation {
     protected:
         std::function<float(float)> _forward_func;
         std::function<float(float)> _backward_func;
@@ -18,12 +22,13 @@ namespace Activations {
         float _forward(float x) {
             return _forward_func(x);
         }
+
         float _backward(float x) {
             return _backward_func(x);
         } 
 
     public:
-        LambdaActivation(std::function<float(float)> forward, std::function<float(float)> backward)
+        ElementWiseActivation(std::function<float(float)> forward, std::function<float(float)> backward)
             : _forward_func(forward), _backward_func(backward) { }
 
         virtual std::shared_ptr<Value> operator()(const std::shared_ptr<Value>& input) final {
@@ -40,76 +45,69 @@ namespace Activations {
             return out;
         }
 
-        virtual std::vector<std::shared_ptr<Value>> operator()(const std::vector<std::shared_ptr<Value>>& inputs) final {
-            std::vector<std::shared_ptr<Value>> outputs; 
+        virtual Tensor1D operator()(const Tensor1D& inputs) override {
+            Tensor1D outputs(inputs.dimensions());  // Create a tensor with the same dimensions as inputs
 
-            for (const auto& val : inputs) {
-                outputs.push_back((*this)(val));
+            for (int i = 0; i < inputs.size(); ++i) {
+                outputs({i}) = this->operator()(inputs({i}));  // Apply the forward operation on each element
             }
 
             return outputs;
         }
     };
 
-    class LambdaActivationVector : public BaseActivation {
+    class TensorWiseActivation : public BaseActivation {
     protected:
         std::function<std::vector<float>(const std::vector<float>& x)> _forward_func;
         std::function<std::vector<float>(const std::vector<float>& x)> _backward_func;
 
-        virtual std::vector<float> _forward(const std::vector<float>& x) {
+        std::vector<float> _forward(const std::vector<float>& x) {
             return _forward_func(x);
         }
-        virtual std::vector<float> _backward(const std::vector<float>& x) {
+
+        std::vector<float> _backward(const std::vector<float>& x) {
             return _backward_func(x);
         }
 
     public:
-        LambdaActivationVector(
+        TensorWiseActivation(
             std::function<std::vector<float>(const std::vector<float>& x)> forward,
             std::function<std::vector<float>(const std::vector<float>& x)> backward)
             : _forward_func(forward), _backward_func(backward) { }
 
-        virtual std::vector<std::shared_ptr<Value>> operator()(const std::vector<std::shared_ptr<Value>>& inputs) override {
+        virtual Tensor1D operator()(const Tensor1D& inputs) override {
             // Convert input Values to raw float data
             std::vector<float> x(inputs.size());
-            for (size_t i = 0; i < inputs.size(); ++i) {
-                x[i] = inputs[i]->getData();
+            for (int i = 0; i < inputs.size(); ++i) {
+                x[i] = inputs({i})->getData();
             }
 
             // Apply the forward function to compute the output
             std::vector<float> out = _forward_func(x);
 
-            // Convert children to shared pointers
-            std::vector<std::shared_ptr<Value>> children(inputs.size());
-            for (size_t i = 0; i < inputs.size(); ++i) {
-                children[i] = inputs[i];  // Use existing shared pointers to the input Values
-            }
-
-            // Initialize outputs with the correct children
-            std::vector<std::shared_ptr<Value>> outputs;
-            for (size_t i = 0; i < out.size(); ++i) {
+            // Initialize outputs
+            Tensor1D outputs(inputs.dimensions());
+            for (int i = 0; i < out.size(); ++i) {
                 auto val = std::make_shared<Value>(out[i]);
 
-                // Add children correctly
-                for (const auto& child : children) {
-                    val->addChild(child);
+                // Add the original inputs as children for backpropagation
+                for (int j = 0; j < inputs.size(); ++j) {
+                    val->addChild(inputs({j}));
                 }
 
-                outputs.push_back(val);  // Store the output value
+                outputs({i}) = val;
             }
 
-            // Define the backward function for each output
-            for (size_t i = 0; i < outputs.size(); ++i) {
-                outputs[i]->setBackward([&, i]() {
-                    // Compute the gradient with respect to the output
-                    std::vector<float> grad_softmax = _backward_func(out);
-                    for (size_t j = 0; j < inputs.size(); ++j) {
-                        inputs[j]->accumulateGrad(grad_softmax[j] * outputs[i]->getGrad());
+            // Define the backward function for each output element
+            for (int i = 0; i < outputs.size(); ++i) {
+                outputs({i})->setBackward([inputs, outputs, this, i, x]() {
+                    std::vector<float> grad_softmax = _backward_func(x);
+                    for (int j = 0; j < inputs.size(); ++j) {
+                        inputs({j})->accumulateGrad(grad_softmax[j] * outputs({i})->getGrad());
                     }
                 });
             }
 
-            // Return the outputs
             return outputs;
         }
     };

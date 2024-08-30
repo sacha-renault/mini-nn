@@ -1,9 +1,10 @@
 #include <iostream>
-#include "src/mini-nn/src/Values/Value.hpp"
-#include "src/mini-nn/src/Activations/ActivationFunction.hpp"
-#include "src/mini-nn/src/Activations/Static.hpp"
-#include "src/mini-nn/src/Layers/Neuron.hpp"
-#include "src/mini-nn/src/Layers/Dense.hpp"
+#include "src/mini-nn/Values/Value.hpp"
+#include "src/mini-nn/Activations/ActivationFunction.hpp"
+#include "src/mini-nn/Activations/Static.hpp"
+#include "src/mini-nn/Layers/Neuron.hpp"
+#include "src/mini-nn/Layers/Dense.hpp"
+#include "src/mini-nn/Values/Tensor.hpp"
 
 // int main(){
 //     auto a = Value::create(2);
@@ -98,12 +99,12 @@ int main(){
     Layers::Dense l3(5, 5, Activations::Tanh);
     Layers::Dense l4(5, 1, Activations::Sigmoid);
 
-    std::vector<std::shared_ptr<Value>> inputs;
+    Tensor<1> inputs({ 5 });
     for (int i = 0 ; i < 5 ; ++i){
-        inputs.push_back(Value::create(1.0f));
+        inputs({i}) = Value::create(1.0f);
     }
 
-    std::vector<std::shared_ptr<Value>> x;
+    Tensor<1> x;
     
 
     x = l1.forward(inputs);
@@ -150,7 +151,7 @@ int main(){
     for (auto val : l4.getBiases()){
         std::cout << "l4 Biases : " << val->toString() << std::endl;
     }   
-    std::cout << "out : " << x[0]->toString() << std::endl;
+    std::cout << "out : " << x({0})->toString() << std::endl;
     
     return 0;
 }
