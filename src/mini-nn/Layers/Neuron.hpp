@@ -17,17 +17,14 @@ private:
 public:
     // Constructor
     Neuron(int num_inputs) : 
-            wi_({num_inputs}), 
-            xiwi_({num_inputs}),
+            xiwi_({ num_inputs }),
             output_(Value::create(0.0f))  {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
 
         // Initialize weights
-        for (int i = 0; i < num_inputs; ++i) {
-            wi_({i}) = Value::create(dist(gen));
-        }
+        wi_ = Tensor::randn({ num_inputs });
 
         // Create the bias point
         bias_ = Value::create(dist(gen));  // Initialize bias

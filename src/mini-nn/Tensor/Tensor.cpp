@@ -82,3 +82,48 @@ void Tensor::reshape(const std::vector<Eigen::Index>& new_dims) {
 void Tensor::flatten() {
     dimensions_ = { total_size_ };
 }
+
+// Static method to create a tensor filled with ones
+Tensor Tensor::ones(const std::vector<Eigen::Index>& dims) {
+    Tensor tensor(dims);
+    for (int i = 0; i < tensor.size(); ++i) {
+        tensor.data_(i) = Value::create(1.0f);
+    }
+    return tensor;
+}
+
+// Static method to create a tensor filled with zeros
+Tensor Tensor::zeros(const std::vector<Eigen::Index>& dims) {
+    Tensor tensor(dims);
+    for (int i = 0; i < tensor.size(); ++i) {
+        tensor.data_(i) = Value::create(0.0f);
+    }
+    return tensor;
+}
+
+// Static method to create a tensor filled with random values
+Tensor Tensor::random(const std::vector<Eigen::Index>& dims, float min, float max) {
+    Tensor tensor(dims);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dis(min, max);
+
+    for (int i = 0; i < tensor.size(); ++i) {
+        tensor.data_(i) = Value::create(dis(gen));
+    }
+    return tensor;
+}
+
+
+// Static method to create a tensor filled with values from a randn distribution
+Tensor Tensor::randn(const std::vector<Eigen::Index>& dims, float mean, float stddev) {
+    Tensor tensor(dims);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<float> dis(mean, stddev);
+
+    for (int i = 0; i < tensor.size(); ++i) {
+        tensor.data_(i) = Value::create(dis(gen));
+    }
+    return tensor;
+}

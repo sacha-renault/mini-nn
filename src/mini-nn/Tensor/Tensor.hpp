@@ -37,10 +37,19 @@ public:
 
     void display() const;
 
+
+
     // FOR ITERATOR
 
     auto begin() { return data_.data(); }
     auto end() { return data_.data() + data_.size(); }
     auto begin() const { return data_.data(); }
     auto end() const { return data_.data() + data_.size(); }
+
+
+    // Public static factory methods
+    static Tensor ones(const std::vector<Eigen::Index>& dims);
+    static Tensor zeros(const std::vector<Eigen::Index>& dims);
+    static Tensor random(const std::vector<Eigen::Index>& dims, float min = 0.0f, float max = 1.0f);
+    static Tensor randn(const std::vector<Eigen::Index>& dims, float mean = 0.0f, float stddev = 1.0f);
 };
