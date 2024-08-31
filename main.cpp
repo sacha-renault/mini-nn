@@ -10,14 +10,14 @@
 
 
 int main(){
-    float stepSize = 2e-2; // i.e. lr
+    float stepSize = 1e-2; // i.e. lr
     int input_size = 16;
 
     auto model = Sequential();
-    model.addLayer(std::make_shared<Layers::Dense>(5, 5, Activations::Tanh));
-    model.addLayer(std::make_shared<Layers::Dense>(5, 5, Activations::Tanh));
-    model.addLayer(std::make_shared<Layers::Dense>(5, 5, Activations::Tanh));
-    model.addLayer(std::make_shared<Layers::Dense>(5, 1, Activations::Sigmoid));
+    model.addLayer(Layers::Dense::create(5, 5, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(5, 5, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(5, 5, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(5, 1, Activations::Sigmoid));
     
     
     std::vector<Tensor> inputs;
@@ -39,7 +39,7 @@ int main(){
     for (int j = 0 ; j < 500 ; ++j)
     {
 
-        if (j%10 == 0 && j != 0){
+        if (j%100 == 0 && j != 0){
             stepSize = stepSize*0.9;
         }
 
@@ -59,7 +59,6 @@ int main(){
         Gradient::zeroGrad(grad);
 
         std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize <<std::endl;   
-//         std::cout << "Input : "<< inputs[0]({0})->toString() <<stepSize <<std::endl;       
     }
     
     
