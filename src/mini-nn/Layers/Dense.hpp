@@ -35,6 +35,14 @@ namespace Layers {
                 func_ = ActivationWrapper(std::make_shared<ElementWiseActivation>(func));
             }
 
+        // Static factory method
+        static std::shared_ptr<Dense> create(int num_inputs, int num_outputs){
+            return std::make_shared<Dense>(num_inputs, num_outputs);
+        }
+        static std::shared_ptr<Dense> create(int num_inputs, int num_outputs, ElementWiseActivation func){
+            return std::make_shared<Dense>(num_inputs, num_outputs, func);
+        }
+
         // Forward pass for the dense layer
         Tensor& forward(Tensor& inputs) override;
 
