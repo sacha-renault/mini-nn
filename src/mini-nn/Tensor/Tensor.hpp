@@ -5,7 +5,7 @@
 
 class Tensor {
 private:
-    Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1> data_;
+    std::shared_ptr<Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>> data_;
     std::vector<Eigen::Index> dimensions_;
     Eigen::Index total_size_;
 
@@ -23,7 +23,8 @@ public:
 
     void fill(const std::shared_ptr<Value>& value);
 
-    const Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>& data() const;
+    const Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>& mat() const;
+    Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>& mat();
 
     int rank() const;
 
@@ -41,10 +42,10 @@ public:
 
     // FOR ITERATOR
 
-    auto begin() { return data_.data(); }
-    auto end() { return data_.data() + data_.size(); }
-    auto begin() const { return data_.data(); }
-    auto end() const { return data_.data() + data_.size(); }
+    auto begin() { return mat().data(); }
+    auto end() { return mat().data() + mat().size(); }
+    auto begin() const { return mat().data(); }
+    auto end() const { return mat().data() + mat().size(); }
 
 
     // Public static factory methods

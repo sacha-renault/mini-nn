@@ -17,6 +17,7 @@ private:
 public:
     // Constructor
     Neuron(int num_inputs) : 
+            wi_({ num_inputs }),
             xiwi_({ num_inputs }),
             output_(Value::create(0.0f))  {
         std::random_device rd;

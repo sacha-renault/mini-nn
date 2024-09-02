@@ -5,7 +5,9 @@ Tensor::Tensor(const std::vector<Eigen::Index>& dims) : dimensions_(dims), total
     for (const auto& dim : dimensions_) {
         total_size_ *= dim;
     }
-    data_.resize(total_size_);
+    // data_ = new Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>(total_size_, 1);
+    // mat().resize(total_size_);
+    data_ = std::make_shared<Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>>(total_size_, 1);
 }
 
 // private function to compute the 1D index from ND index
@@ -21,20 +23,23 @@ Eigen::Index Tensor::computeIndex(const std::vector<Eigen::Index>& indices) cons
 
 // Access element by multi-dimensional indices
 std::shared_ptr<Value>& Tensor::operator()(const std::vector<Eigen::Index>& indices) {
-    return data_(computeIndex(indices));
+    return mat()(computeIndex(indices));
 }
 const std::shared_ptr<Value>& Tensor::operator()(const std::vector<Eigen::Index>& indices) const {
-    return data_(computeIndex(indices));
+    return mat()(computeIndex(indices));
 }
 
 // Fill tensor with a specific value
 void Tensor::fill(const std::shared_ptr<Value>& value) {
-    data_.setConstant(value);
+    mat().setConstant(value);
 }
 
 // Get the underlying Eigen::Matrix
-const Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>& Tensor::data() const {
-    return data_;
+const Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>& Tensor::mat() const {
+    return *data_;
+}
+Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>& Tensor::mat() {
+    return *data_;
 }
 
 // Get the rank
@@ -49,14 +54,14 @@ std::vector<Eigen::Index> Tensor::dim() const {
 
 // Total size
 Eigen::Index Tensor::size() const {
-    return data_.size();
+    return mat().size();
 }
 
 // Display tensor for debugging
 void Tensor::display() const {
     std::cout << "Tensor: ";
-    for (int i = 0; i < data_.size(); ++i) {
-        std::cout << data_.data()[i]->getData() << " ";  // Assuming Value has a get() method
+    for (int i = 0; i < mat().size(); ++i) {
+        std::cout << mat().data()[i]->getData() << " ";  // Assuming Value has a get() method
     }
     std::cout << std::endl;
 }
@@ -87,7 +92,7 @@ void Tensor::flatten() {
 Tensor Tensor::ones(const std::vector<Eigen::Index>& dims) {
     Tensor tensor(dims);
     for (int i = 0; i < tensor.size(); ++i) {
-        tensor.data_(i) = Value::create(1.0f);
+        tensor.mat()(i, 0) = Value::create(1.0f);
     }
     return tensor;
 }
@@ -96,7 +101,7 @@ Tensor Tensor::ones(const std::vector<Eigen::Index>& dims) {
 Tensor Tensor::zeros(const std::vector<Eigen::Index>& dims) {
     Tensor tensor(dims);
     for (int i = 0; i < tensor.size(); ++i) {
-        tensor.data_(i) = Value::create(0.0f);
+        tensor.mat()(i, 0) = Value::create(0.0f);
     }
     return tensor;
 }
@@ -109,7 +114,7 @@ Tensor Tensor::random(const std::vector<Eigen::Index>& dims, float min, float ma
     std::uniform_real_distribution<float> dis(min, max);
 
     for (int i = 0; i < tensor.size(); ++i) {
-        tensor.data_(i) = Value::create(dis(gen));
+        tensor.mat()(i, 0) = Value::create(dis(gen));
     }
     return tensor;
 }
@@ -123,7 +128,7 @@ Tensor Tensor::randn(const std::vector<Eigen::Index>& dims, float mean, float st
     std::normal_distribution<float> dis(mean, stddev);
 
     for (int i = 0; i < tensor.size(); ++i) {
-        tensor.data_(i) = Value::create(dis(gen));
+        tensor.mat()(i, 0) = Value::create(dis(gen));
     }
     return tensor;
 }
