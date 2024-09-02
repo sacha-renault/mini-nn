@@ -8,6 +8,10 @@ private:
     std::shared_ptr<Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>> data_;
     std::vector<Eigen::Index> dimensions_;
     Eigen::Index total_size_;
+    
+    // For subtensor
+    Eigen::Index offset_;
+    std::vector<Eigen::Index> strides_;
 
     // private function to compute the 1D index from ND index
     Eigen::Index computeIndex(const std::vector<Eigen::Index>& indices) const;

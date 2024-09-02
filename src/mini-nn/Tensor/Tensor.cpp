@@ -1,22 +1,25 @@
 #include "Tensor.hpp"
 
 // Constructor
-Tensor::Tensor(const std::vector<Eigen::Index>& dims) : dimensions_(dims), total_size_(1) {
-    for (const auto& dim : dimensions_) {
-        total_size_ *= dim;
+Tensor::Tensor(const std::vector<Eigen::Index>& dims) {
+    total_size_ = 1;
+    dimensions_ = dims;
+    strides_.resize(dims.size());
+    offset_ = 0;
+
+    for (int i = dims.size() - 1; i >= 0; --i) {
+        strides_[i] = total_size_;
+        total_size_ *= dims[i];
     }
-    // data_ = new Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>(total_size_, 1);
-    // mat().resize(total_size_);
+    
     data_ = std::make_shared<Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>>(total_size_, 1);
 }
 
 // private function to compute the 1D index from ND index
 Eigen::Index Tensor::computeIndex(const std::vector<Eigen::Index>& indices) const {
-    Eigen::Index index = 0;
-    Eigen::Index multiplier = 1;
+    Eigen::Index index = offset_;
     for (int i = dimensions_.size() - 1; i >= 0; --i) {
-        index += indices[i] * multiplier;
-        multiplier *= dimensions_[i];
+        index += indices[i] * strides_[i];
     }
     return index;
 }
