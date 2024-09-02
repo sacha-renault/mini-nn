@@ -19,13 +19,14 @@ namespace Math
             result->addChild(val);
         }
 
+        // create a copy of data
+        auto mat = tensor.mat();
+
         // Set the backward function to distribute the gradient to all children
-        result->setBackward([result, tensor]() {
+        result->setBackward([result, mat]() {
             float upperNodeGradient = result->getGrad();
-            for (auto& child : tensor) {
-                if (child) {
-                    child->accumulateGrad(upperNodeGradient);
-                }
+            for (int i = 0 ; i < mat.size() ; ++i) {
+                mat[i]->accumulateGrad(upperNodeGradient);
             }
         });
         return result;
