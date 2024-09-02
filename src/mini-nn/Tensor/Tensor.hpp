@@ -42,10 +42,10 @@ public:
 
     // FOR ITERATOR
 
-    auto begin() { return mat().data(); }
-    auto end() { return mat().data() + mat().size(); }
-    auto begin() const { return mat().data(); }
-    auto end() const { return mat().data() + mat().size(); }
+    auto begin() { return data_->data(); }
+    auto end() { return data_->data() + data_->size(); }
+    auto begin() const { return data_->data(); }
+    auto end() const { return data_->data() + data_->size(); }
 
 
     // Public static factory methods

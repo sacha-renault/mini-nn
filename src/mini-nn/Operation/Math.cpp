@@ -7,7 +7,7 @@ namespace Math
         float total = 0.0f;
 
         // Collect all the data and children references
-        for (auto val : tensor) {
+        for (auto& val : tensor) {
             total += val->getData();
         }
 
@@ -15,14 +15,14 @@ namespace Math
         auto result = Value::create(total);
 
         // add other as childs
-        for (auto val : tensor) {
+        for (auto& val : tensor) {
             result->addChild(val);
         }
 
         // Set the backward function to distribute the gradient to all children
         result->setBackward([result, tensor]() {
             float upperNodeGradient = result->getGrad();
-            for (auto child : tensor) {
+            for (auto& child : tensor) {
                 if (child) {
                     child->accumulateGrad(upperNodeGradient);
                 }

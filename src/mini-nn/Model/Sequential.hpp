@@ -20,7 +20,7 @@ public:
     std::vector<std::shared_ptr<Value>> getParameters() override {
         std::vector<std::shared_ptr<Value>> params;
         for(auto& layer : layers_) {
-            for(auto param : layer->getParameters()){
+            for(auto& param : layer->getParameters()){
                 params.push_back(param);
             }
         }
@@ -29,7 +29,7 @@ public:
 
 
     void update(float lr) override {
-        for(auto param: getParameters()){
+        for(auto& param: getParameters()){
             param->updateData(lr);
         }
     }

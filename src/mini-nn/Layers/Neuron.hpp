@@ -17,8 +17,6 @@ private:
 public:
     // Constructor
     Neuron(int num_inputs) : 
-            wi_({ num_inputs }),
-            xiwi_({ num_inputs }),
             output_(Value::create(0.0f))  {
         std::random_device rd;
         std::mt19937 gen(rd());
@@ -26,6 +24,7 @@ public:
 
         // Initialize weights
         wi_ = Tensor::randn({ num_inputs });
+        xiwi_ = Tensor::zeros({ num_inputs });
 
         // Create the bias point
         bias_ = Value::create(dist(gen));  // Initialize bias
