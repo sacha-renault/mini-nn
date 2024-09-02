@@ -19,17 +19,21 @@ namespace Math
             result->addChild(val);
         }
 
-        // create a copy of data
-        auto mat = tensor.mat();
-
         // Set the backward function to distribute the gradient to all children
-        result->setBackward([result, mat]() {
+        result->setBackward([result, tensor]() {
             float upperNodeGradient = result->getGrad();
-            for (int i = 0 ; i < mat.size() ; ++i) {
-                mat[i]->accumulateGrad(upperNodeGradient);
+            for (auto& node : tensor) {
+                node->accumulateGrad(upperNodeGradient);
             }
         });
         return result;
+    }
+
+
+    std::shared_ptr<Value> reduceMean(Tensor& tensor) {
+        auto val = reduceSum(tensor);
+        val->setValue(val->getData() / tensor.size());
+        return std::move(val);
     }
 
 
