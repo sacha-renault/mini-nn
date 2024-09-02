@@ -21,23 +21,23 @@ int main(){
     model.addLayer(Layers::Dense::create(4, 1, Activations::Tanh));
     
     
-    std::vector<Tensor> inputs;
-    for (int i = 0 ; i < input_size ; ++i) {
-        inputs.push_back(Tensor::randn({ input_data_sisze }, -1, 1));
-    }
+    Tensor inputs = Tensor::randn({input_size, input_data_sisze});
     
-    std::vector<int> y;
+    Tensor y({input_size});
     for (int i = 0 ; i < input_size ; ++i) {
         int sum = 0; 
-        for (auto val : inputs[i]) {
+        for (auto& val : inputs[i]) {
             sum += val->getData();
         }
-        y.push_back(sum > 0 ? 1 : -1);
+        y({i}) = Value::create(sum > 0 ? 1 : -1);
     }
 
     std::cout << "Start training " <<std::endl;
-    for (int j = 0 ; j < 500 ; ++j)
+    int j = 0;
+    float loss = 1;
+    while (loss > 1e-2)
     {
+        j++;
         if (j%100 == 0 && j != 0){
             stepSize = stepSize*0.85;
         }
@@ -45,21 +45,22 @@ int main(){
         Tensor outputs({input_size});
         
         for (int i = 0 ; i < input_size ; ++i) {
-            Tensor x = model.forward(inputs[i]);
+            auto in = inputs[i];
+            Tensor x = model.forward(in);
 
-            auto loss = Math::pow(x({0})->sub(Value::create(y[i])), 2);
+            auto loss = Math::pow(x({0})->sub(y({i})), 2);
             outputs({i}) = loss;            
         }
 
         // auto fLoss = Math::reduceSum(outputs);
-        auto fLoss = outputs({0})->add(outputs({1}));
+        auto fLoss = Math::reduceMean(outputs);
         auto grad = Gradient::getGraphNodes(fLoss);
         Gradient::backward(grad);
         model.update(stepSize);
         Gradient::derefGraph(grad);
-        // std::cout << "Use count: " << x.data().use_count() << std::endl;
 
         std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize <<std::endl;   
+        loss = fLoss->getData();
     }
 
     return 0;
@@ -76,18 +77,20 @@ int main(){
 // }
 
 // int main() {
-//     Tensor tensor = Tensor::fromValue({20}, 1.0);
+//     Tensor tensor = Tensor::zeros({20});
 
-//    for (int i = 0 ; i < 20 ; ++i){
-//     tensor({ i }) = Value::create((float)i);
-//    }
+//     tensor.reshape({4, 5});
+
+//     auto subtensor = tensor[0];
+
+//     int size = subtensor.size();
+//     std::cout << "";
+//     for (auto& d : subtensor){
+//         d->setValue(1.0);
+//     }
 
 //     tensor.display();
-//     Tensor tensor = Tensor::ones({5, 5});
-//     auto data = tensor.data();
-//     std::cout << "Use count: " << tensor.data().use_count() << std::endl; // Should be 1 if no other references exist
-//     std::cout << "Use count: " << data.use_count() << std::endl; // Should be 1 if no other references exist
-
+//     subtensor.display();
 
 //     return 0;
 // }
