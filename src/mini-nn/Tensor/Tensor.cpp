@@ -1,17 +1,30 @@
 #include "Tensor.hpp"
 
 // Constructor
-Tensor::Tensor(const std::vector<Eigen::Index>& dims) : dimensions_(dims), total_size_(1) {
-    for (const auto& dim : dimensions_) {
-        total_size_ *= dim;
+Tensor::Tensor(const std::vector<int>& dims) {
+    total_size_ = 1;
+    // dimensions_ = dims;
+    dimensions_ = dims;
+
+    for (auto& d : dimensions_) {
+        total_size_ *= d;
     }
-    data_.resize(total_size_);
+    
+    data_ = std::vector<std::shared_ptr<Value>>(total_size_);
+}
+
+Tensor::Tensor(const std::vector<int>& dims, std::vector<std::shared_ptr<Value>> data)
+           : Tensor(dims) {
+    
+    // Init a subtensor sharing same data as main tensor 
+    // but indexes will be different
+    data_ = std::move(data);
 }
 
 // private function to compute the 1D index from ND index
-Eigen::Index Tensor::computeIndex(const std::vector<Eigen::Index>& indices) const {
-    Eigen::Index index = 0;
-    Eigen::Index multiplier = 1;
+int Tensor::computeIndex(const std::vector<int>& indices) const {
+    int index = 0;
+    int multiplier = 1;
     for (int i = dimensions_.size() - 1; i >= 0; --i) {
         index += indices[i] * multiplier;
         multiplier *= dimensions_[i];
@@ -20,20 +33,55 @@ Eigen::Index Tensor::computeIndex(const std::vector<Eigen::Index>& indices) cons
 }
 
 // Access element by multi-dimensional indices
-std::shared_ptr<Value>& Tensor::operator()(const std::vector<Eigen::Index>& indices) {
-    return data_(computeIndex(indices));
+std::shared_ptr<Value>& Tensor::operator()(const std::vector<int>& indices) {
+    return mat()[computeIndex(indices)];
 }
-const std::shared_ptr<Value>& Tensor::operator()(const std::vector<Eigen::Index>& indices) const {
-    return data_(computeIndex(indices));
+const std::shared_ptr<Value>& Tensor::operator()(const std::vector<int>& indices) const {
+    return mat()[computeIndex(indices)];
+}
+
+Tensor Tensor::operator[](int index) {
+    // Validate the index
+    if (index < 0 || index >= dimensions_[0]) {
+        throw std::out_of_range("Index out of bounds for the first dimension");
+    }
+
+    // Calculate the new dimensions after slicing
+    std::vector<int> newDims(dimensions_.begin() + 1, dimensions_.end());
+
+    // Calculate the stride for the first dimension
+    int stride = 1;
+    for (int i = 1; i < dimensions_.size(); ++i) {
+        stride *= dimensions_[i];
+    }
+
+    // Calculate the offset in the data array
+    int offset = index * stride;
+
+    // Create a new data vector for the subtensor
+    std::vector<std::shared_ptr<Value>> newData(stride);
+
+    // Copy the relevant data
+    for (int i = 0; i < stride; ++i) {
+        newData[i] = data_[offset + i];
+    }
+
+    // Return the new subtensor
+    return Tensor(newDims, newData);
 }
 
 // Fill tensor with a specific value
-void Tensor::fill(const std::shared_ptr<Value>& value) {
-    data_.setConstant(value);
+void Tensor::fill(float value) {
+    for (int i = 0 ; i < total_size_ ; ++i) {
+        data_[i] = Value::create(value);
+    }
 }
 
 // Get the underlying Eigen::Matrix
-const Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>& Tensor::data() const {
+const std::vector<std::shared_ptr<Value>>& Tensor::mat() const {
+    return data_;
+}
+std::vector<std::shared_ptr<Value>>& Tensor::mat() {
     return data_;
 }
 
@@ -43,28 +91,28 @@ int Tensor::rank() const {
 }
 
 // Get dimensions of the tensor
-std::vector<Eigen::Index> Tensor::dim() const {
+const std::vector<int>& Tensor::dim() const {
     return dimensions_;
 }
 
 // Total size
-Eigen::Index Tensor::size() const {
-    return data_.size();
+int Tensor::size() const {
+    return total_size_;
 }
 
 // Display tensor for debugging
 void Tensor::display() const {
     std::cout << "Tensor: ";
-    for (int i = 0; i < data_.size(); ++i) {
-        std::cout << data_.data()[i]->getData() << " ";  // Assuming Value has a get() method
+    for (int i = 0; i < mat().size(); ++i) {
+        std::cout << mat().data()[i]->getData() << " ";
     }
     std::cout << std::endl;
 }
 
 // Reshape the tensor
-void Tensor::reshape(const std::vector<Eigen::Index>& new_dims) {
+void Tensor::reshape(const std::vector<int>& new_dims) {
     // Compute the total size of the new dimensions
-    Eigen::Index new_total_size = 1;
+    int new_total_size = 1;
     for (const auto& dim : new_dims) {
         new_total_size *= dim;
     }
@@ -83,47 +131,97 @@ void Tensor::flatten() {
     dimensions_ = { total_size_ };
 }
 
+Tensor Tensor::slice(int start, int end, int axis) {
+    // Validate the axis
+    if (axis < 0 || axis >= dimensions_.size()) {
+        throw std::invalid_argument("Invalid axis for slicing.");
+    }
+
+    // Validate the start and end indices
+    if (start < 0 || end > dimensions_[axis] || start >= end) {
+        throw std::invalid_argument("Invalid start or end indices for slicing.");
+    }
+
+    // Calculate the new dimensions after slicing
+    std::vector<int> newDims = dimensions_; // copy
+    newDims[axis] = end - start;
+
+    // Prepare new data storage for the sliced tensor
+    int newSize = 1;
+    for (int dim : newDims) {
+        newSize *= dim;
+    }
+    std::vector<std::shared_ptr<Value>> newData(newSize);
+
+    // Calculate the strides for the original tensor
+    std::vector<int> strides(dimensions_.size(), 1);
+    for (int i = dimensions_.size() - 2; i >= 0; --i) {
+        strides[i] = strides[i + 1] * dimensions_[i + 1];
+    }
+
+    // Calculate the offset to the start index along the slicing axis
+    int baseOffset = start * strides[axis];
+
+    // Iterate over the new tensor and fill the data
+    for (int i = 0; i < newSize; ++i) {
+        // Compute the corresponding index in the original tensor
+        int newIndex = i;
+        int originalIndex = baseOffset;
+        for (int j = newDims.size() - 1; j >= 0; --j) {
+            int idx = newIndex % newDims[j];
+            originalIndex += idx * strides[j];
+            newIndex /= newDims[j];
+        }
+
+        // Copy the data from the original tensor to the new tensor
+        newData[i] = data_[originalIndex];
+    }
+
+    // Return the new sliced tensor
+    return Tensor(newDims, newData);
+}
+
 // Static method to create a tensor filled with ones
-Tensor Tensor::ones(const std::vector<Eigen::Index>& dims) {
+Tensor Tensor::ones(const std::vector<int>& dims) {
     Tensor tensor(dims);
     for (int i = 0; i < tensor.size(); ++i) {
-        tensor.data_(i) = Value::create(1.0f);
+        tensor.mat()[i] = Value::create(1.0f);
     }
     return tensor;
 }
 
 // Static method to create a tensor filled with zeros
-Tensor Tensor::zeros(const std::vector<Eigen::Index>& dims) {
+Tensor Tensor::zeros(const std::vector<int>& dims) {
     Tensor tensor(dims);
     for (int i = 0; i < tensor.size(); ++i) {
-        tensor.data_(i) = Value::create(0.0f);
+        tensor.mat()[i] = Value::create(0.0f);
     }
     return tensor;
 }
 
 // Static method to create a tensor filled with random values
-Tensor Tensor::random(const std::vector<Eigen::Index>& dims, float min, float max) {
+Tensor Tensor::random(const std::vector<int>& dims, float min, float max) {
     Tensor tensor(dims);
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> dis(min, max);
 
     for (int i = 0; i < tensor.size(); ++i) {
-        tensor.data_(i) = Value::create(dis(gen));
+        tensor.mat()[i] = Value::create(dis(gen));
     }
     return tensor;
 }
 
 
 // Static method to create a tensor filled with values from a randn distribution
-Tensor Tensor::randn(const std::vector<Eigen::Index>& dims, float mean, float stddev) {
+Tensor Tensor::randn(const std::vector<int>& dims, float mean, float stddev) {
     Tensor tensor(dims);
     std::random_device rd;
     std::mt19937 gen(rd());
     std::normal_distribution<float> dis(mean, stddev);
 
     for (int i = 0; i < tensor.size(); ++i) {
-        tensor.data_(i) = Value::create(dis(gen));
+        tensor.mat()[i] = Value::create(dis(gen));
     }
     return tensor;
 }

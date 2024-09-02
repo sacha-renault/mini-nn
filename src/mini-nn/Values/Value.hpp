@@ -35,6 +35,9 @@ public:
     // Setter for gradient
     void accumulateGrad(float grad) { grad_ += grad; }
 
+    // Setter for value
+    void setValue(float val) { data_ = val; }
+
     // Set the backward function
     void setBackward(std::function<void()> func) { backward_ = func; }
 

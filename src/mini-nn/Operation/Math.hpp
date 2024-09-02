@@ -8,6 +8,11 @@ namespace Math
     /// @param tensor 
     /// @return ptr on the sum
     std::shared_ptr<Value> reduceSum(Tensor& tensor);
+
+    /// @brief calc the mean value of all tensor into a single Value
+    /// @param tensor 
+    /// @return ptr on the sum
+    std::shared_ptr<Value> reduceMean(Tensor& tensor);
     
 
     /// @brief raise a Value to a desired power

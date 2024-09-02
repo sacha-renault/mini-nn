@@ -1,42 +1,49 @@
 #pragma once
-#include <unsupported/Eigen/CXX11/Tensor>
+#include <vector>
+#include <random>
 #include <memory>
 #include "../Values/Value.hpp"
 
 class Tensor {
 private:
-    Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1> data_;
-    std::vector<Eigen::Index> dimensions_;
-    Eigen::Index total_size_;
+    std::vector<std::shared_ptr<Value>> data_;
+    int total_size_;
+    std::vector<int> dimensions_;    
 
     // private function to compute the 1D index from ND index
-    Eigen::Index computeIndex(const std::vector<Eigen::Index>& indices) const;
+    int computeIndex(const std::vector<int>& indices) const;
 
 public:
     Tensor() {};
 
-    Tensor(const std::vector<Eigen::Index>& dims);
+    Tensor(const std::vector<int>& dims);
 
-    std::shared_ptr<Value>& operator()(const std::vector<Eigen::Index>& indices);
+    Tensor(const std::vector<int>& dims, std::vector<std::shared_ptr<Value>> data);
 
-    const std::shared_ptr<Value>& operator()(const std::vector<Eigen::Index>& indices) const;
+    std::shared_ptr<Value>& operator()(const std::vector<int>& indices);
 
-    void fill(const std::shared_ptr<Value>& value);
+    const std::shared_ptr<Value>& operator()(const std::vector<int>& indices) const;
 
-    const Eigen::Matrix<std::shared_ptr<Value>, Eigen::Dynamic, 1>& data() const;
+    Tensor operator[](int index);
+    
+    Tensor slice(int start, int end, int axis = 0);
+
+    void fill(float value);
+
+    const std::vector<std::shared_ptr<Value>>& mat() const;
+    std::vector<std::shared_ptr<Value>>& mat();
 
     int rank() const;
 
-    std::vector<Eigen::Index> dim() const;
+    const std::vector<int>& dim() const;
 
-    Eigen::Index size() const;
+    int size() const;
 
-    void reshape(const std::vector<Eigen::Index>& new_dims);
+    void reshape(const std::vector<int>& new_dims);
 
     void flatten();
 
     void display() const;
-
 
 
     // FOR ITERATOR
@@ -48,8 +55,8 @@ public:
 
 
     // Public static factory methods
-    static Tensor ones(const std::vector<Eigen::Index>& dims);
-    static Tensor zeros(const std::vector<Eigen::Index>& dims);
-    static Tensor random(const std::vector<Eigen::Index>& dims, float min = 0.0f, float max = 1.0f);
-    static Tensor randn(const std::vector<Eigen::Index>& dims, float mean = 0.0f, float stddev = 1.0f);
+    static Tensor ones(const std::vector<int>& dims);
+    static Tensor zeros(const std::vector<int>& dims);
+    static Tensor random(const std::vector<int>& dims, float min = 0.0f, float max = 1.0f);
+    static Tensor randn(const std::vector<int>& dims, float mean = 0.0f, float stddev = 1.0f);
 };
