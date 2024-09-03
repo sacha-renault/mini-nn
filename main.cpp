@@ -7,10 +7,12 @@
 #include "src/mini-nn/Tensor/Tensor.hpp"
 #include "src/mini-nn/Operation/Gradient.hpp"
 #include "src/mini-nn/Model/Sequential.hpp"
+#include "src/mini-nn/Losses/Losses.hpp"
 
 
 int main(){
     float stepSize = 5e-2; // i.e. lr
+    float endloss = 1e-5;
     int num_data = 8;
     int input_data_sisze = 64;
 
@@ -38,30 +40,28 @@ int main(){
     std::cout << "Start training " <<std::endl;
     int j = 0;
     float loss = 1;
-    while (loss > 1e-2)
+    while (loss > endloss)
     {
 
 
         Tensor x = model.forward(inputs);
 
-        Tensor sub = Math::ewSub(x, y);
-        Tensor outputs = Math::pow(sub, 2);
-        auto fLoss = Math::reduceMean(outputs);
+        auto fLoss = Losses::meanSquareError(x, y);
 
         auto grad = Gradient::reverseTopologicalOrder(fLoss);
         Gradient::backward(grad);
-        int nclip = Gradient::clipGrad(grad, 2.5f);
+        int nclip = Gradient::clipGrad(grad, 1.5f);
         model.update(stepSize);
         Gradient::zeroGrad(grad);
 
         loss = fLoss->getData();
 
-        if (j%100 == 0 || loss <= 1e-2) {
+        if (j%100 == 0 || loss <= endloss) {
             stepSize = stepSize*0.85;
             std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize;
             std::cout << " ; nclip : " << nclip << std::endl;
-            x.display();
-            y.display();
+            // x.display();
+            // y.display();
         }
         j++;
     }
