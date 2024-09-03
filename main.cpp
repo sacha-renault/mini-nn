@@ -11,8 +11,8 @@
 
 int main(){
     float stepSize = 1e-2; // i.e. lr
-    int input_size = 16;
-    int input_data_sisze = 32;
+    int num_data = 4;
+    int input_data_sisze = 16;
 
     auto model = Sequential();
     model.addLayer(Layers::Dense::create(input_data_sisze, 16, Activations::Tanh));
@@ -21,10 +21,10 @@ int main(){
     model.addLayer(Layers::Dense::create(4, 1, Activations::Tanh));
 
 
-    Tensor inputs = Tensor::randn({input_size, input_data_sisze});
+    Tensor inputs = Tensor::randn({num_data, input_data_sisze});
 
-    Tensor y({input_size});
-    for (int i = 0 ; i < input_size ; ++i) {
+    Tensor y({num_data});
+    for (int i = 0 ; i < num_data ; ++i) {
         int sum = 0;
         for (auto& val : inputs[i]) {
             sum += val->getData();
@@ -38,19 +38,22 @@ int main(){
     while (loss > 1e-2)
     {
         j++;
-        // if (j%100 == 0 && j != 0){
-        //     stepSize = stepSize*0.85;
-        // }
+        if (j%100 == 0 && j != 0){
+            stepSize = stepSize*0.85;
+        }
 
-        Tensor outputs({input_size});
+        Tensor outputs({num_data});
 
-        for (int i = 0 ; i < input_size ; ++i) {
+        for (int i = 0 ; i < num_data ; ++i) {
             auto in = inputs[i];
             Tensor x = model.forward(in);
+
+            std::cout << i <<" " << x({0})->getData() << " " << y({i})->getData() << std::endl;
 
             auto loss = Math::pow(x({0})->sub(y({i})), 2);
             outputs({i}) = loss;
         }
+
 
         // auto fLoss = Math::reduceSum(outputs);
         auto fLoss = Math::reduceMean(outputs);
@@ -59,6 +62,7 @@ int main(){
         int nclip = Gradient::clipGrad(grad);
         model.update(stepSize);
         Gradient::zeroGrad(grad);
+
 
         std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize;
         std::cout << " ; nclip : " << nclip << std::endl;
