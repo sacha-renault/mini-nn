@@ -14,6 +14,7 @@ namespace Layers {
     private:
         std::vector<Neuron> neurons_;  // Neurons in the dense layer
         Tensor outputs_;  // Shared pointers to the outputs of the layer
+        Tensor activationOutputs_;  // Shared pointers to the outputs of the layer
         ActivationWrapper func_;
 
     public:
@@ -44,7 +45,7 @@ namespace Layers {
         }
 
         // Forward pass for the dense layer
-        Tensor& forward(Tensor& inputs) override;
+        const Tensor& forward(Tensor& inputs) override;
 
         /// @brief Backward pass for the dense layer
         // void backward() override;

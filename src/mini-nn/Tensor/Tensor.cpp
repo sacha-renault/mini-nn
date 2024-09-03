@@ -182,9 +182,13 @@ Tensor Tensor::slice(int start, int end, int axis) {
 }
 
 void Tensor::setValueLike(Tensor& tensor) {
+    if (dim() != tensor.dim()) {
+        throw std::runtime_error("Tensor shape not equal");
+    }
     int n = tensor.total_size_;
     for (int i = 0; i < n ; ++i) {
-        data_[i]->setValue(tensor.data_[i]->getData());
+        float newData = tensor.data_[i]->getData();
+        data_[i]->setValue(newData);
     }
 }
 

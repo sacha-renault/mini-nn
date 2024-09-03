@@ -42,9 +42,9 @@ std::shared_ptr<Value> Value::add(const std::shared_ptr<Value>& other){
         this->accumulateGrad(out->getGrad());
     });
 
-    forward_ = [out, other, this]() {
+    out->setForward([out, other, this]() {
         out->setValue(this->getData() + other->getData());
-    };
+    });
 
     return out;
 }
@@ -55,9 +55,9 @@ std::shared_ptr<Value> Value::times(const std::shared_ptr<Value>& other){
         other->accumulateGrad(out->getGrad() * this->data_);
         this->accumulateGrad(out->getGrad() * other->getData());
     });
-    forward_ = [out, other, this]() {
+    out->setForward([out, other, this]() {
         out->setValue(this->getData() * other->getData());
-    };
+    });
     return out;
 }
 
@@ -67,9 +67,9 @@ std::shared_ptr<Value> Value::sub(const std::shared_ptr<Value>& other) {
         other->accumulateGrad(-out->getGrad()); // Negative gradient for subtraction
         this->accumulateGrad(out->getGrad());
     });
-    forward_ = [out, other, this]() {
+    out->setForward([out, other, this]() {
         out->setValue(this->getData() - other->getData());
-    };
+    });
     return out;
 }
 
@@ -79,9 +79,9 @@ std::shared_ptr<Value> Value::div(const std::shared_ptr<Value>& other) {
         other->accumulateGrad(-out->getGrad() * this->data_ / (other->getData() * other->getData()));
         this->accumulateGrad(out->getGrad() / other->getData());
     });
-    forward_ = [out, other, this]() {
+    out->setForward([out, other, this]() {
         out->setValue(this->getData() / other->getData());
-    };
+    });
     return out;
 }
 

@@ -15,7 +15,7 @@ namespace Activations {
             input->accumulateGrad(_backward(out->getData()) * out->getGrad());
         });
 
-        input->setForward([out, input, this]() {
+        out->setForward([out, input, this]() {
             out->setValue(_forward(input->getData()));
         });
 

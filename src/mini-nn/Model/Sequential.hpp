@@ -38,11 +38,11 @@ public:
         }
     }
 
-    Tensor forward(Tensor& input) override {
+    const Tensor& forward(Tensor& input) override {
         if (!graphBuilded) {
             graphBuilded = true;
             input_ = input; // TODO, real copy of tensor input
-            auto x = input;
+            auto x = input_;
             for (auto& layer : layers_) {
                 x = layer->forward(x);
             }

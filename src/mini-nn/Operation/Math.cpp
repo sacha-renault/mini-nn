@@ -27,7 +27,7 @@ namespace Math
             }
         });
 
-        tensor.mat()[0]->setForward([result, tensor]() {
+        result->setForward([result, tensor]() {
             // Sum all the data from the other values
             float total = 0.0f;
 

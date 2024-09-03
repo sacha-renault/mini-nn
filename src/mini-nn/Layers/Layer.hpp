@@ -10,7 +10,7 @@ public:
     virtual ~Layer() = default;
 
     // Pure virtual method for the forward pass
-    virtual Tensor& forward(Tensor& inputs) = 0;
+    virtual const Tensor& forward(Tensor& inputs) = 0;
 
     // Pure virtual method for the backward pass (if needed)
     // virtual void backward() = 0;

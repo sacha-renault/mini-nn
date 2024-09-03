@@ -2,14 +2,14 @@
 
 namespace Layers
 {
-    Tensor& Dense::forward(Tensor& inputs) {
+    const Tensor& Dense::forward(Tensor& inputs) {
         for (int i = 0; i < neurons_.size(); ++i) {
             outputs_({i}) = neurons_[i].forward(inputs);  // Store each neuron's output
         }
 
-        outputs_ = func_(outputs_);
+        activationOutputs_ = func_(outputs_);
 
-        return outputs_;
+        return activationOutputs_;
     }
 
     // void Dense::backward() {
