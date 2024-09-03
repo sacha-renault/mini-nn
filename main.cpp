@@ -15,9 +15,9 @@ int main(){
     int input_data_sisze = 4;
 
     auto model = Sequential();
-    model.addLayer(Layers::Dense::create(input_data_sisze, 16, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(input_data_sisze, 4, Activations::Tanh));
     // model.addLayer(Layers::Dense::create(16, 8, Activations::Tanh));
-    model.addLayer(Layers::Dense::create(8, 4, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(4, 4, Activations::Tanh));
     model.addLayer(Layers::Dense::create(4, 1, Activations::Tanh));
 
 
