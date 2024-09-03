@@ -12,13 +12,12 @@
 int main(){
     float stepSize = 1e-2; // i.e. lr
     int num_data = 4;
-    int input_data_sisze = 4;
+    int input_data_sisze = 16;
 
     auto model = Sequential();
-    model.addLayer(Layers::Dense::create(input_data_sisze, 4, Activations::Tanh));
-    model.addLayer(Layers::Dense::create(4, 4, Activations::Tanh));
-    // model.addLayer(Layers::Dense::create(16, 8, Activations::Tanh));
-    // model.addLayer(Layers::Dense::create(8, 4, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(input_data_sisze, 16, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(16, 8, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(8, 4, Activations::Tanh));
     model.addLayer(Layers::Dense::create(4, 1, Activations::Tanh));
 
 
@@ -39,7 +38,7 @@ int main(){
     while (loss > 1e-2)
     {
         j++;
-        if (j%250 == 0 && j != 0){
+        if (j%100 == 0 && j != 0){
             stepSize = stepSize*0.85;
         }
 
@@ -49,7 +48,7 @@ int main(){
             auto in = inputs[i];
             Tensor x = model.forward(in);
 
-            // std::cout << i << " " << x({0})->getData() << " " << y({i})->getData() << std::endl;
+            std::cout << i <<" " << x({0})->getData() << " " << y({i})->getData() << std::endl;
 
             auto loss = Math::pow(x({0})->sub(y({i})), 2);
             outputs({i}) = loss;
@@ -60,16 +59,13 @@ int main(){
         auto fLoss = Math::reduceMean(outputs);
         auto grad = Gradient::reverseTopologicalOrder(fLoss);
         Gradient::backward(grad);
-        // int nclip = Gradient::clipGrad(grad);
+        int nclip = Gradient::clipGrad(grad);
         model.update(stepSize);
-        for (auto& g : grad) {
-            std::cout << g->toString() << std::endl;
-        }
         Gradient::zeroGrad(grad);
 
 
-        std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize << std::endl;
-        // std::cout << " ; nclip : " << nclip << std::endl;
+        std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize;
+        std::cout << " ; nclip : " << nclip << std::endl;
         loss = fLoss->getData();
     }
 
