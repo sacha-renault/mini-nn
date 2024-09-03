@@ -10,37 +10,37 @@
 
 
 int main(){
-    float stepSize = 2e-2; // i.e. lr
-    int num_data = 32;
+    float stepSize = 5e-2; // i.e. lr
+    int num_data = 8;
     int input_data_sisze = 64;
 
     auto model = Sequential();
-    model.addLayer(Layers::Dense::create(input_data_sisze, 16, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(input_data_sisze, 32, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(32, 16, Activations::Tanh));
     model.addLayer(Layers::Dense::create(16, 8, Activations::Tanh));
-    model.addLayer(Layers::Dense::create(8, 4, Activations::Tanh));
-    model.addLayer(Layers::Dense::create(4, 1, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(8, 1, Activations::Tanh));
 
 
     Tensor inputs = Tensor::randn({num_data, input_data_sisze});
 
     Tensor y({num_data});
-    for (int i = 0 ; i < num_data ; ++i) {
-        int sum = 0;
-        for (auto& val : inputs[i]) {
-            sum += val->getData();
-        }
-        y({i}) = Value::create(sum > 0 ? 1 : -1);
-    }
+
+    y({0}) = Value::create(1);
+    y({1}) = Value::create(0);
+    y({2}) = Value::create(-1);
+    y({3}) = Value::create(1);
+    y({4}) = Value::create(1);
+    y({5}) = Value::create(0);
+    y({6}) = Value::create(-1);
+    y({7}) = Value::create(0);
+
 
     std::cout << "Start training " <<std::endl;
     int j = 0;
     float loss = 1;
     while (loss > 1e-2)
     {
-        j++;
-        if (j%100 == 0 && j != 0){
-            stepSize = stepSize*0.85;
-        }
+
 
         Tensor x = model.forward(inputs);
 
@@ -50,14 +50,20 @@ int main(){
 
         auto grad = Gradient::reverseTopologicalOrder(fLoss);
         Gradient::backward(grad);
-        int nclip = Gradient::clipGrad(grad);
+        int nclip = Gradient::clipGrad(grad, 2.5f);
         model.update(stepSize);
         Gradient::zeroGrad(grad);
 
-
-        std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize;
-        std::cout << " ; nclip : " << nclip << std::endl;
         loss = fLoss->getData();
+
+        if (j%100 == 0 || loss <= 1e-2) {
+            stepSize = stepSize*0.85;
+            std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize;
+            std::cout << " ; nclip : " << nclip << std::endl;
+            x.display();
+            y.display();
+        }
+        j++;
     }
 
     return 0;
