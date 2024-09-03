@@ -38,7 +38,7 @@ namespace Math
 
             result->setValue(total);
         });
-        return result;
+        return std::move(result);
     }
 
 
@@ -78,7 +78,7 @@ namespace Math
 
             result->setValue(total / tensor.size());
         });
-        return result;
+        return std::move(result);
     }
 
 
