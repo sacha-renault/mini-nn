@@ -65,3 +65,6 @@ public:
     void zeroGrad();
     void derefGraph();
 };
+
+// Alias for std::shared_ptr<Value>
+using ValRef = std::shared_ptr<Value>;
