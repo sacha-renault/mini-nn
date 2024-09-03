@@ -13,7 +13,8 @@ protected:
     float data_;
     float grad_;
     std::unordered_set<std::shared_ptr<Value>> children_; // Children of the current Value in the computational graph
-    std::function<void()> backward_;               // Backward function for backpropagation
+    std::function<void()> backward_;                      // Backward function for backpropagation
+    std::function<void()> forward_;                       // forward function for optimized computation
 
 public:
     // Constructor
@@ -28,18 +29,20 @@ public:
     float getData() const { return data_; }
     float getGrad() const { return grad_; }
     std::unordered_set<std::shared_ptr<Value>>& getChildren() { return children_; }
-    void updateData(float stepSize) { 
-        data_ -= grad_ * stepSize; 
+    void updateData(float stepSize) {
+        data_ -= grad_ * stepSize;
     }
 
     // Setter for gradient
     void accumulateGrad(float grad) { grad_ += grad; }
+    void setGradient(float grad) { grad_ = grad; }
 
     // Setter for value
     void setValue(float val) { data_ = val; }
 
     // Set the backward function
     void setBackward(std::function<void()> func) { backward_ = func; }
+    void setForward(std::function<void()> func) { forward_ = func; }
 
     // Add a child
     void addChild(const std::shared_ptr<Value>& child) {
@@ -58,6 +61,7 @@ public:
 
     // Backward pass initialization
     void backward();
+    void forward();
     void zeroGrad();
     void derefGraph();
 };

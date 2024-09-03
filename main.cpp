@@ -11,8 +11,8 @@
 
 int main(){
     float stepSize = 1e-2; // i.e. lr
-    int input_size = 16;
-    int input_data_sisze = 32;
+    int num_data = 32;
+    int input_data_sisze = 64;
 
     auto model = Sequential();
     model.addLayer(Layers::Dense::create(input_data_sisze, 16, Activations::Tanh));
@@ -21,10 +21,10 @@ int main(){
     model.addLayer(Layers::Dense::create(4, 1, Activations::Tanh));
 
 
-    Tensor inputs = Tensor::randn({input_size, input_data_sisze});
+    Tensor inputs = Tensor::randn({num_data, input_data_sisze});
 
-    Tensor y({input_size});
-    for (int i = 0 ; i < input_size ; ++i) {
+    Tensor y({num_data});
+    for (int i = 0 ; i < num_data ; ++i) {
         int sum = 0;
         for (auto& val : inputs[i]) {
             sum += val->getData();
@@ -42,24 +42,27 @@ int main(){
             stepSize = stepSize*0.85;
         }
 
-        Tensor outputs({input_size});
+        Tensor outputs({num_data});
+        Tensor x = model.forward(inputs);
 
-        for (int i = 0 ; i < input_size ; ++i) {
-            auto in = inputs[i];
-            Tensor x = model.forward(in);
-
-            auto loss = Math::pow(x({0})->sub(y({i})), 2);
+        for (int i = 0 ; i < num_data ; ++i) {
+            // std::cout << i <<" " << x({i})->getData() << " " << y({i})->getData() << std::endl;
+            auto loss = Math::pow(x({i, 0})->sub(y({i})), 2);
             outputs({i}) = loss;
         }
+
 
         // auto fLoss = Math::reduceSum(outputs);
         auto fLoss = Math::reduceMean(outputs);
         auto grad = Gradient::reverseTopologicalOrder(fLoss);
         Gradient::backward(grad);
+        int nclip = Gradient::clipGrad(grad);
         model.update(stepSize);
-        Gradient::derefGraph(grad);
+        Gradient::zeroGrad(grad);
 
-        std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize <<std::endl;
+
+        std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize;
+        std::cout << " ; nclip : " << nclip << std::endl;
         loss = fLoss->getData();
     }
 

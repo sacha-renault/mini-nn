@@ -55,4 +55,26 @@ namespace Gradient
             node->derefGraph();
         }
     }
+
+
+    int clipGrad(std::vector<std::shared_ptr<Value>>& gradientNodes, float max) {
+        if (max <= 0) {
+            throw std::runtime_error("Max cannot be equal or less than 0");
+        }
+
+        int clipped = 0;
+        for (auto& node : gradientNodes) {
+            float gradient = node->getGrad();
+            if (std::abs(gradient) > max) {
+                clipped++;
+                if (gradient > 0) {
+                    node->setGradient(max);
+                } else {
+                    node->setGradient(-max);
+                }
+            }
+        }
+
+        return clipped;
+    }
 } // namespace Gradient
