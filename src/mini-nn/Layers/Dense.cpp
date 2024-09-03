@@ -7,9 +7,9 @@ namespace Layers
             outputs_({i}) = neurons_[i].forward(inputs);  // Store each neuron's output
         }
 
-        activationOutputs_ = func_(outputs_);
+        outputs_ = func_(outputs_);
 
-        return activationOutputs_;
+        return outputs_;
     }
 
     // void Dense::backward() {

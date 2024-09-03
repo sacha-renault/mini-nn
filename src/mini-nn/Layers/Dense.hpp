@@ -14,7 +14,6 @@ namespace Layers {
     private:
         std::vector<Neuron> neurons_;  // Neurons in the dense layer
         Tensor outputs_;  // Shared pointers to the outputs of the layer
-        Tensor activationOutputs_;  // Shared pointers to the outputs of the layer
         ActivationWrapper func_;
 
     public:
@@ -58,6 +57,8 @@ namespace Layers {
         /// @brief Get all parameters (biases) from all neurons in the layer
         /// @return Tensor of parameters
         Tensor getBiases() override;
+
+        std::vector<int> shape() { return outputs_.dim(); }
     };
 }
 

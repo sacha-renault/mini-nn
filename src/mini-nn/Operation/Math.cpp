@@ -7,7 +7,7 @@ namespace Math
         float total = 0.0f;
 
         // Collect all the data and children references
-        for (auto& val : tensor) {
+        for (const auto& val : tensor) {
             total += val->getData();
         }
 
@@ -15,7 +15,7 @@ namespace Math
         auto result = Value::create(total);
 
         // add other as childs
-        for (auto& val : tensor) {
+        for (const auto& val : tensor) {
             result->addChild(val);
         }
 

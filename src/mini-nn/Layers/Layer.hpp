@@ -20,4 +20,7 @@ public:
 
     // Any additional virtual methods can be added here as needed
     virtual Tensor getBiases() = 0;
+
+    // Return the shape of the output of the layer
+    virtual std::vector<int> shape() = 0;
 };

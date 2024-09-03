@@ -47,6 +47,8 @@ public:
 
     void setValueLike(Tensor& tensor);
 
+    void assign(int index, Tensor& tensor);
+
 
     // FOR ITERATOR
 

@@ -3,7 +3,6 @@
 // Constructor
 Tensor::Tensor(const std::vector<int>& dims) {
     total_size_ = 1;
-    // dimensions_ = dims;
     dimensions_ = dims;
 
     for (auto& d : dimensions_) {
@@ -189,6 +188,34 @@ void Tensor::setValueLike(Tensor& tensor) {
     for (int i = 0; i < n ; ++i) {
         float newData = tensor.data_[i]->getData();
         data_[i]->setValue(newData);
+    }
+}
+
+void Tensor::assign(int index, Tensor& tensor) {
+    // Validate the index
+    if (index < 0 || index >= dimensions_[0]) {
+        throw std::out_of_range("Index out of bounds for the first dimension");
+    }
+
+    // Validate the dimensions of the input tensor
+    std::vector<int> expectedDims = dimensions_;
+    expectedDims.erase(expectedDims.begin());  // Remove the first dimension
+    if (tensor.dim() != expectedDims) {
+        throw std::invalid_argument("Dimensions of the tensor to assign do not match the target slice dimensions.");
+    }
+
+    // Calculate the stride for the first dimension
+    int stride = 1;
+    for (int i = 1; i < dimensions_.size(); ++i) {
+        stride *= dimensions_[i];
+    }
+
+    // Calculate the offset for the specified index
+    int offset = index * stride;
+
+    // Assign the values from the input tensor to the target slice
+    for (int i = 0; i < stride; ++i) {
+        data_[offset + i] = tensor.mat()[i];
     }
 }
 

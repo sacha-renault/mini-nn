@@ -6,7 +6,7 @@
 class Sequential : public Model {
 protected:
     std::vector<std::shared_ptr<Layer>> layers_;
-    std::vector<std::shared_ptr<Value>> computeGraph;
+    std::vector<std::shared_ptr<Value>> computeGraph_;
     Tensor input_;
     Tensor output_;
     bool graphBuilded;
@@ -39,19 +39,37 @@ public:
     }
 
     const Tensor& forward(Tensor& input) override {
+        if (input.rank() < 2) {
+            throw std::runtime_error("input of rank 1 cannot be batched input");
+        }
+
         if (!graphBuilded) {
+            int batchSize = input.dim()[0];
             graphBuilded = true;
             input_ = input; // TODO, real copy of tensor input
-            auto x = input_;
-            for (auto& layer : layers_) {
-                x = layer->forward(x);
+
+            std::vector<int> outshape;
+            outshape.push_back(batchSize);
+            for (auto val : layers_[layers_.size() - 1]->shape()) {
+                outshape.push_back(val);
             }
-            output_ = x;
-            computeGraph = Gradient::reverseTopologicalOrder(output_);
-        } else {
+            output_ = Tensor::zeros(outshape);
+
+            for (int i = 0 ; i < batchSize ; ++i){
+                Tensor x = input_[i];
+                for (auto& layer : layers_) {
+                    x = layer->forward(x);
+                }
+                output_.assign(i, x);
+            }
+
+            computeGraph_ = Gradient::reverseTopologicalOrder(output_);
+        }
+
+        else {
             input_.setValueLike(input);
-            for (int i = computeGraph.size() - 1 ; i >= 0 ; --i) {
-                computeGraph[i]->forward();
+            for (int i = computeGraph_.size() - 1 ; i >= 0 ; --i) {
+                computeGraph_[i]->forward();
             }
         }
         return output_;

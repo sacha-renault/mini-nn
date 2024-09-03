@@ -11,13 +11,13 @@
 
 int main(){
     float stepSize = 1e-2; // i.e. lr
-    int num_data = 4;
-    int input_data_sisze = 4;
+    int num_data = 32;
+    int input_data_sisze = 64;
 
     auto model = Sequential();
-    model.addLayer(Layers::Dense::create(input_data_sisze, 4, Activations::Tanh));
-    // model.addLayer(Layers::Dense::create(16, 8, Activations::Tanh));
-    model.addLayer(Layers::Dense::create(4, 4, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(input_data_sisze, 16, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(16, 8, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(8, 4, Activations::Tanh));
     model.addLayer(Layers::Dense::create(4, 1, Activations::Tanh));
 
 
@@ -43,14 +43,11 @@ int main(){
         }
 
         Tensor outputs({num_data});
+        Tensor x = model.forward(inputs);
 
         for (int i = 0 ; i < num_data ; ++i) {
-            auto in = inputs[i];
-            Tensor x = model.forward(in);
-
-            std::cout << i <<" " << x({0})->getData() << " " << y({i})->getData() << std::endl;
-
-            auto loss = Math::pow(x({0})->sub(y({i})), 2);
+            // std::cout << i <<" " << x({i})->getData() << " " << y({i})->getData() << std::endl;
+            auto loss = Math::pow(x({i, 0})->sub(y({i})), 2);
             outputs({i}) = loss;
         }
 
