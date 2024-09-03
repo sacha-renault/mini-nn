@@ -107,8 +107,65 @@ namespace Math
     Tensor pow(Tensor& tensor, int exponent) {
         Tensor result(tensor.dim());
         for (int i = 0; i < tensor.size(); ++i) {
-            result({i}) = pow(tensor({i}), exponent);
+            result.mat()[i] = pow(tensor.mat()[i], exponent);
         }
-        return result;
+        return std::move(result);
+    }
+
+    Tensor ewSum(Tensor& t1, Tensor& t2) {
+        if (t1.size() != t2.size()) { // no need for equal dim, just need equal size
+            throw std::invalid_argument("Tensor dimensions must match for element-wise sum.");
+        }
+
+        Tensor result(t1.dim());
+        for (int i = 0; i < t1.size(); ++i) {
+            auto t1_elt = t1.mat()[i];
+            auto t2_elt = t2.mat()[i];
+            result.mat()[i] = t1_elt->add(t2_elt);
+        }
+        return std::move(result);
+    }
+
+    Tensor ewSub(Tensor& t1, Tensor& t2) {
+        if (t1.size() != t2.size()) { // no need for equal dim, just need equal size
+            throw std::invalid_argument("Tensor dimensions must match for element-wise sum.");
+        }
+
+        Tensor result(t1.dim());
+        for (int i = 0; i < t1.size(); ++i) {
+            auto t1_elt = t1.mat()[i];
+            auto t2_elt = t2.mat()[i];
+            auto res = t1_elt->sub(t2_elt);
+            result.mat()[i] = res;
+        }
+        return std::move(result);
+    }
+
+    Tensor ewMul(Tensor& t1, Tensor& t2) {
+        if (t1.size() != t2.size()) { // no need for equal dim, just need equal size
+            throw std::invalid_argument("Tensor dimensions must match for element-wise sum.");
+        }
+
+        Tensor result(t1.dim());
+        for (int i = 0; i < t1.size(); ++i) {
+            auto t1_elt = t1.mat()[i];
+            auto t2_elt = t2.mat()[i];
+            result.mat()[i] = t1_elt->times(t2_elt);
+        }
+        return std::move(result);
+    }
+
+    Tensor ewDiv(Tensor& t1, Tensor& t2) {
+        if (t1.size() != t2.size()) { // no need for equal dim, just need equal size
+            throw std::invalid_argument("Tensor dimensions must match for element-wise sum.");
+        }
+
+        Tensor result(t1.dim());
+        for (int i = 0; i < t1.size(); ++i) {
+            auto t1_elt = t1.mat()[i];
+            auto t2_elt = t2.mat()[i];
+            result.mat()[i] = t1_elt->div(t2_elt);
+        }
+        return std::move(result);
     }
 } // namespace Math

@@ -10,14 +10,14 @@
 
 
 int main(){
-    float stepSize = 1e-2; // i.e. lr
+    float stepSize = 2e-2; // i.e. lr
     int num_data = 32;
     int input_data_sisze = 64;
 
     auto model = Sequential();
-    model.addLayer(Layers::Dense::create(input_data_sisze, 4, Activations::Tanh));
-    // model.addLayer(Layers::Dense::create(16, 8, Activations::Tanh));
-    model.addLayer(Layers::Dense::create(4, 4, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(input_data_sisze, 16, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(16, 8, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(8, 4, Activations::Tanh));
     model.addLayer(Layers::Dense::create(4, 1, Activations::Tanh));
 
 
@@ -42,18 +42,12 @@ int main(){
             stepSize = stepSize*0.85;
         }
 
-        Tensor outputs({num_data});
         Tensor x = model.forward(inputs);
 
-        for (int i = 0 ; i < num_data ; ++i) {
-            // std::cout << i <<" " << x({i})->getData() << " " << y({i})->getData() << std::endl;
-            auto loss = Math::pow(x({i, 0})->sub(y({i})), 2);
-            outputs({i}) = loss;
-        }
-
-
-        // auto fLoss = Math::reduceSum(outputs);
+        Tensor sub = Math::ewSub(x, y);
+        Tensor outputs = Math::pow(sub, 2);
         auto fLoss = Math::reduceMean(outputs);
+
         auto grad = Gradient::reverseTopologicalOrder(fLoss);
         Gradient::backward(grad);
         int nclip = Gradient::clipGrad(grad);
