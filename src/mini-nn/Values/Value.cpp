@@ -31,8 +31,6 @@ void Value::backward() {
 void Value::forward() {
     if (forward_) {
         forward_();
-    } else {
-        int i = 0;
     }
 }
 
@@ -91,6 +89,7 @@ std::shared_ptr<Value> Value::div(const std::shared_ptr<Value>& other) {
 
 void Value::derefGraph() {
     backward_ = nullptr; // deref the lambda function and free memory
+    forward_ = nullptr; // deref the lambda function and free memory
     zeroGrad();
     children_.clear();  // clean all refs to child, since it's share_ptr,
                         // any shared_ptr that doesn't have owner will be free
