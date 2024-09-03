@@ -18,19 +18,19 @@ namespace Layers {
 
     public:
         // Constructor
-        Dense(int num_inputs, int num_outputs) 
+        Dense(int num_inputs, int num_outputs)
             : func_(), outputs_({num_outputs}) {
             for (int i = 0; i < num_outputs; ++i) {
                 neurons_.emplace_back(Neuron(num_inputs));  // Initialize neurons with the number of inputs
             }
         }
 
-        Dense(int num_inputs, int num_outputs, TensorWiseActivation func) 
+        Dense(int num_inputs, int num_outputs, TensorWiseActivation func)
             :  Dense(num_inputs, num_outputs) {
                 func_ = ActivationWrapper(std::make_shared<TensorWiseActivation>(func));
             }
-        
-        Dense(int num_inputs, int num_outputs, ElementWiseActivation func) 
+
+        Dense(int num_inputs, int num_outputs, ElementWiseActivation func)
             :  Dense(num_inputs, num_outputs) {
                 func_ = ActivationWrapper(std::make_shared<ElementWiseActivation>(func));
             }
@@ -47,9 +47,9 @@ namespace Layers {
         Tensor& forward(Tensor& inputs) override;
 
         /// @brief Backward pass for the dense layer
-        void backward() override;
+        // void backward() override;
 
-        
+
         /// @brief Get all parameters (weights) from all neurons in the layer
         /// @return Tensor of parameters
         Tensor getParameters() override;

@@ -6,22 +6,22 @@ namespace Layers
         for (int i = 0; i < neurons_.size(); ++i) {
             outputs_({i}) = neurons_[i].forward(inputs);  // Store each neuron's output
         }
-        
+
         outputs_ = func_(outputs_);
 
         return outputs_;
     }
 
-    void Dense::backward() {
-        // Ensure output is a single element
-        if (outputs_.dim()[0] == 1) {
-            outputs_({0});
-        } 
-        else { // Case there isn't a single element, we sum first to start backprop on a single node
-            auto node = Math::reduceSum(outputs_);
-            node->backward();
-        }
-    }
+    // void Dense::backward() {
+    //     // Ensure output is a single element
+    //     if (outputs_.dim()[0] == 1) {
+    //         outputs_({0});
+    //     }
+    //     else { // Case there isn't a single element, we sum first to start backprop on a single node
+    //         auto node = Math::reduceSum(outputs_);
+    //         node->backward();
+    //     }
+    // }
 
     Tensor Dense::getParameters() {
         // First calculate the number of weight

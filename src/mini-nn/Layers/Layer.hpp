@@ -13,7 +13,7 @@ public:
     virtual Tensor& forward(Tensor& inputs) = 0;
 
     // Pure virtual method for the backward pass (if needed)
-    virtual void backward() = 0;
+    // virtual void backward() = 0;
 
     // Pure virtual method to get the parameters of the layer
     virtual Tensor getParameters() = 0;
