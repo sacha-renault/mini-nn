@@ -2,7 +2,7 @@
 
 namespace Gradient
 {
-    std::vector<std::shared_ptr<Value>> getGraphNodes(const std::shared_ptr<Value>& root) {
+    std::vector<std::shared_ptr<Value>> topologicalOrder(const std::shared_ptr<Value>& root) {
         std::vector<std::shared_ptr<Value>> sorted;
         std::unordered_set<std::shared_ptr<Value>> visited;
 
@@ -16,16 +16,21 @@ namespace Gradient
         };
 
         dfs(root);
-        std::reverse(sorted.begin(), sorted.end());
         return std::move(sorted);
     }
 
-    std::vector<std::shared_ptr<Value>> getGraphNodes(Tensor& output) {
+    std::vector<std::shared_ptr<Value>> reverseTopologicalOrder(const std::shared_ptr<Value>& root) {
+        std::vector<std::shared_ptr<Value>> nodes = topologicalOrder(root);
+        std::reverse(nodes.begin(), nodes.end());
+        return std::move(nodes);
+    }
+
+    std::vector<std::shared_ptr<Value>> reverseTopologicalOrder(Tensor& output) {
         if (output.size() != 1) {
             auto rootNode = Math::reduceSum(output);
-            return getGraphNodes(rootNode);
+            return reverseTopologicalOrder(rootNode);
         } else {
-            return getGraphNodes(output({0}));
+            return reverseTopologicalOrder(output({0}));
         }
     }
 

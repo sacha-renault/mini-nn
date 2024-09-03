@@ -19,13 +19,13 @@ int main(){
     model.addLayer(Layers::Dense::create(16, 8, Activations::Tanh));
     model.addLayer(Layers::Dense::create(8, 4, Activations::Tanh));
     model.addLayer(Layers::Dense::create(4, 1, Activations::Tanh));
-    
-    
+
+
     Tensor inputs = Tensor::randn({input_size, input_data_sisze});
-    
+
     Tensor y({input_size});
     for (int i = 0 ; i < input_size ; ++i) {
-        int sum = 0; 
+        int sum = 0;
         for (auto& val : inputs[i]) {
             sum += val->getData();
         }
@@ -43,23 +43,23 @@ int main(){
         }
 
         Tensor outputs({input_size});
-        
+
         for (int i = 0 ; i < input_size ; ++i) {
             auto in = inputs[i];
             Tensor x = model.forward(in);
 
             auto loss = Math::pow(x({0})->sub(y({i})), 2);
-            outputs({i}) = loss;            
+            outputs({i}) = loss;
         }
 
         // auto fLoss = Math::reduceSum(outputs);
         auto fLoss = Math::reduceMean(outputs);
-        auto grad = Gradient::getGraphNodes(fLoss);
+        auto grad = Gradient::reverseTopologicalOrder(fLoss);
         Gradient::backward(grad);
         model.update(stepSize);
         Gradient::derefGraph(grad);
 
-        std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize <<std::endl;   
+        std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize <<std::endl;
         loss = fLoss->getData();
     }
 
