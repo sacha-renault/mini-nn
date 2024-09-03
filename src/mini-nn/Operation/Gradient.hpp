@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include <math.h>
+#include <iostream>
 #include "Math.hpp"
 #include "../Values/Value.hpp"
 #include "../Tensor/Tensor.hpp"
@@ -38,6 +40,11 @@ namespace Gradient
     /// it does destroy the compute graph
     /// @param gradientNodes
     void derefGraph(std::vector<std::shared_ptr<Value>>& gradientNodes);
+
+    /// @brief clip gradient to a abs max value
+    /// @param gradientNodes
+    /// @return number of node where gradient was clipped
+    int clipGrad(std::vector<std::shared_ptr<Value>>& gradientNodes, float max = 1.0f);
 
 } // namespace Gradient
 

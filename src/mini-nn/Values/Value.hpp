@@ -28,12 +28,13 @@ public:
     float getData() const { return data_; }
     float getGrad() const { return grad_; }
     std::unordered_set<std::shared_ptr<Value>>& getChildren() { return children_; }
-    void updateData(float stepSize) { 
-        data_ -= grad_ * stepSize; 
+    void updateData(float stepSize) {
+        data_ -= grad_ * stepSize;
     }
 
     // Setter for gradient
     void accumulateGrad(float grad) { grad_ += grad; }
+    void setGradient(float grad) { grad_ = grad; }
 
     // Setter for value
     void setValue(float val) { data_ = val; }

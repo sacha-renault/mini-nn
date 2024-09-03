@@ -56,10 +56,12 @@ int main(){
         auto fLoss = Math::reduceMean(outputs);
         auto grad = Gradient::reverseTopologicalOrder(fLoss);
         Gradient::backward(grad);
+        int nclip = Gradient::clipGrad(grad);
         model.update(stepSize);
         Gradient::derefGraph(grad);
 
-        std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize <<std::endl;
+        std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize;
+        std::cout << " ; nclip : " << nclip << std::endl;
         loss = fLoss->getData();
     }
 
