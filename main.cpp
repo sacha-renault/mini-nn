@@ -38,9 +38,9 @@ int main(){
     while (loss > 1e-2)
     {
         j++;
-        if (j%100 == 0 && j != 0){
-            stepSize = stepSize*0.85;
-        }
+        // if (j%100 == 0 && j != 0){
+        //     stepSize = stepSize*0.85;
+        // }
 
         Tensor outputs({input_size});
 
@@ -58,7 +58,7 @@ int main(){
         Gradient::backward(grad);
         int nclip = Gradient::clipGrad(grad);
         model.update(stepSize);
-        Gradient::derefGraph(grad);
+        Gradient::zeroGrad(grad);
 
         std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize;
         std::cout << " ; nclip : " << nclip << std::endl;

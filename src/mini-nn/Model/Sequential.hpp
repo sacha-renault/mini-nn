@@ -6,8 +6,12 @@
 class Sequential : public Model {
 protected:
     std::vector<std::shared_ptr<Layer>> layers_;
+    std::vector<std::shared_ptr<Value>> computeGraph;
+    Tensor input_;
+    Tensor output_;
+    bool graphBuilded;
 public:
-    Sequential() : layers_() {}
+    Sequential() : layers_(), graphBuilded(false) {}
 
     // Add layers
     void addLayer(const std::shared_ptr<Layer>& layer) {
@@ -33,11 +37,23 @@ public:
             param->updateData(lr);
         }
     }
+
     Tensor forward(Tensor& input) override {
-        auto x = input;
-        for (auto& layer : layers_) {
-            x = layer->forward(x);
+        if (!graphBuilded) {
+            graphBuilded = true;
+            input_ = input; // TODO, real copy of tensor input
+            auto x = input;
+            for (auto& layer : layers_) {
+                x = layer->forward(x);
+            }
+            output_ = x;
+            computeGraph = Gradient::reverseTopologicalOrder(output_);
+        } else {
+            input_.setValueLike(input);
+            for (int i = computeGraph.size() - 1 ; i >= 0 ; --i) {
+                computeGraph[i]->forward();
+            }
         }
-        return x;
+        return output_;
     }
 };

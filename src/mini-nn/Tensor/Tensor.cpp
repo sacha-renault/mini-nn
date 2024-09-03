@@ -9,14 +9,14 @@ Tensor::Tensor(const std::vector<int>& dims) {
     for (auto& d : dimensions_) {
         total_size_ *= d;
     }
-    
+
     data_ = std::vector<std::shared_ptr<Value>>(total_size_);
 }
 
 Tensor::Tensor(const std::vector<int>& dims, std::vector<std::shared_ptr<Value>> data)
            : Tensor(dims) {
-    
-    // Init a subtensor sharing same data as main tensor 
+
+    // Init a subtensor sharing same data as main tensor
     // but indexes will be different
     data_ = std::move(data);
 }
@@ -86,8 +86,8 @@ std::vector<std::shared_ptr<Value>>& Tensor::mat() {
 }
 
 // Get the rank
-int Tensor::rank() const { 
-    return dimensions_.size(); 
+int Tensor::rank() const {
+    return dimensions_.size();
 }
 
 // Get dimensions of the tensor
@@ -179,6 +179,13 @@ Tensor Tensor::slice(int start, int end, int axis) {
 
     // Return the new sliced tensor
     return Tensor(newDims, newData);
+}
+
+void Tensor::setValueLike(Tensor& tensor) {
+    int n = tensor.total_size_;
+    for (int i = 0; i < n ; ++i) {
+        data_[i]->setValue(tensor.data_[i]->getData());
+    }
 }
 
 // Static method to create a tensor filled with ones
