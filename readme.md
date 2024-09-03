@@ -8,7 +8,7 @@
 
 ### Computation
 - [x] Backpropagation.
-- [ ] Forward in a graph (instead of current impl where it has to run though all layers)
+- [x] Forward in a graph.s
 
 ### Dense & Model
 - [ ] Basic model
@@ -27,23 +27,30 @@
 - [x] Get graph (topo order)
 - [x] Backward propagation
 - [x] Grad reset
-- [ ] gradient clipping
-- [ ]
+- [x] Gradient clipping
+- [ ] Gradient noize injection.
+- [ ] More things on gradient ...
 
 ### Math
 
 #### Reduce Ops
 - [x] sum
 - [x] mean
+- [ ] add reduce on axis.
 
 #### Elementwise ops
-- [ ] Add
-- [ ] Sub
-- [ ] Mul
-- [ ] Div
+- [x] Add
+- [x] Sub
+- [x] Mul
+- [x] Div
 - [x] Pow (float exp)
 - [ ] Pow (Tensor exp)
 
+#### Losses
+- [ ] MSE
+- [ ] MAE
+- [ ] BCE
+- [ ] CCE
 
 ### Optimizer
 - [ ] Learn optimizer!!!
