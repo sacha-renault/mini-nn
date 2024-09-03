@@ -3,20 +3,19 @@
 // Constructor
 Tensor::Tensor(const std::vector<int>& dims) {
     total_size_ = 1;
-    // dimensions_ = dims;
     dimensions_ = dims;
 
     for (auto& d : dimensions_) {
         total_size_ *= d;
     }
-    
+
     data_ = std::vector<std::shared_ptr<Value>>(total_size_);
 }
 
 Tensor::Tensor(const std::vector<int>& dims, std::vector<std::shared_ptr<Value>> data)
            : Tensor(dims) {
-    
-    // Init a subtensor sharing same data as main tensor 
+
+    // Init a subtensor sharing same data as main tensor
     // but indexes will be different
     data_ = std::move(data);
 }
@@ -86,8 +85,8 @@ std::vector<std::shared_ptr<Value>>& Tensor::mat() {
 }
 
 // Get the rank
-int Tensor::rank() const { 
-    return dimensions_.size(); 
+int Tensor::rank() const {
+    return dimensions_.size();
 }
 
 // Get dimensions of the tensor
@@ -179,6 +178,45 @@ Tensor Tensor::slice(int start, int end, int axis) {
 
     // Return the new sliced tensor
     return Tensor(newDims, newData);
+}
+
+void Tensor::setValueLike(Tensor& tensor) {
+    if (dim() != tensor.dim()) {
+        throw std::runtime_error("Tensor shape not equal");
+    }
+    int n = tensor.total_size_;
+    for (int i = 0; i < n ; ++i) {
+        float newData = tensor.data_[i]->getData();
+        data_[i]->setValue(newData);
+    }
+}
+
+void Tensor::assign(int index, Tensor& tensor) {
+    // Validate the index
+    if (index < 0 || index >= dimensions_[0]) {
+        throw std::out_of_range("Index out of bounds for the first dimension");
+    }
+
+    // Validate the dimensions of the input tensor
+    std::vector<int> expectedDims = dimensions_;
+    expectedDims.erase(expectedDims.begin());  // Remove the first dimension
+    if (tensor.dim() != expectedDims) {
+        throw std::invalid_argument("Dimensions of the tensor to assign do not match the target slice dimensions.");
+    }
+
+    // Calculate the stride for the first dimension
+    int stride = 1;
+    for (int i = 1; i < dimensions_.size(); ++i) {
+        stride *= dimensions_[i];
+    }
+
+    // Calculate the offset for the specified index
+    int offset = index * stride;
+
+    // Assign the values from the input tensor to the target slice
+    for (int i = 0; i < stride; ++i) {
+        data_[offset + i] = tensor.mat()[i];
+    }
 }
 
 // Static method to create a tensor filled with ones

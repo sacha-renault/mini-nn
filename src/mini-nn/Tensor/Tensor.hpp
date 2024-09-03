@@ -8,7 +8,7 @@ class Tensor {
 private:
     std::vector<std::shared_ptr<Value>> data_;
     int total_size_;
-    std::vector<int> dimensions_;    
+    std::vector<int> dimensions_;
 
     // private function to compute the 1D index from ND index
     int computeIndex(const std::vector<int>& indices) const;
@@ -25,7 +25,7 @@ public:
     const std::shared_ptr<Value>& operator()(const std::vector<int>& indices) const;
 
     Tensor operator[](int index);
-    
+
     Tensor slice(int start, int end, int axis = 0);
 
     void fill(float value);
@@ -44,6 +44,10 @@ public:
     void flatten();
 
     void display() const;
+
+    void setValueLike(Tensor& tensor);
+
+    void assign(int index, Tensor& tensor);
 
 
     // FOR ITERATOR

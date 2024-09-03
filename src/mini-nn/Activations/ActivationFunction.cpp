@@ -3,7 +3,7 @@
 namespace Activations {
     /// @brief Activation on a single neuron
     /// @param input value (taht is neuron output)
-    /// @return output tensor 
+    /// @return output tensor
     std::shared_ptr<Value> ElementWiseActivation::operator()(const std::shared_ptr<Value>& input){
         float x = input->getData();
         float outVal = _forward(x);
@@ -15,12 +15,16 @@ namespace Activations {
             input->accumulateGrad(_backward(out->getData()) * out->getGrad());
         });
 
+        out->setForward([out, input, this]() {
+            out->setValue(_forward(input->getData()));
+        });
+
         return out;
     }
 
     /// @brief Element wise activation
     /// @param input Tensor
-    /// @return output tensor 
+    /// @return output tensor
     Tensor ElementWiseActivation::operator()(const Tensor& inputs) {
         Tensor outputs(inputs.dim());  // Create a tensor with the same dimensions as inputs
 
