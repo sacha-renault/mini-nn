@@ -9,12 +9,19 @@
 #include "src/mini-nn/Model/Sequential.hpp"
 #include "src/mini-nn/Losses/Losses.hpp"
 
+#include <cstdlib> // For std::rand() and std::srand()
+#include <ctime>   // For std::time()
+
 
 int main(){
     float stepSize = 5e-2; // i.e. lr
     float endloss = 1e-5;
-    int num_data = 8;
+    int num_data = 16*16;
     int input_data_sisze = 64;
+    int num_epoch = 150;
+
+    // seed
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     auto model = Sequential();
     model.addLayer(Layers::Dense::create(input_data_sisze, 32, Activations::Tanh));
@@ -23,77 +30,43 @@ int main(){
     model.addLayer(Layers::Dense::create(8, 1, Activations::Tanh));
 
 
-    Tensor inputs = Tensor::randn({num_data, input_data_sisze});
+    Tensor inputs = Tensor::randn({num_data, input_data_sisze});    // Init a full random tensor
 
-    Tensor y({num_data});
+    Tensor y({num_data});                                           // init a ytrue tensor (empty)
 
-    y({0}) = Value::create(1);
-    y({1}) = Value::create(0);
-    y({2}) = Value::create(-1);
-    y({3}) = Value::create(1);
-    y({4}) = Value::create(1);
-    y({5}) = Value::create(0);
-    y({6}) = Value::create(-1);
-    y({7}) = Value::create(0);
+    for (int i = 0 ; i < num_data ; ++i) {
+        y({i}) = Value::create((std::rand() % 2 == 0) ? -1 : 1);    // Fill it with rdn values
+    }
 
 
     std::cout << "Start training " <<std::endl;
-    int j = 0;
-    float loss = 1;
-    while (loss > endloss)
+    for (int epoch = 1 ; epoch < num_epoch ; epoch++)
     {
-
-
-        Tensor x = model.forward(inputs);
-
-        auto fLoss = Losses::meanSquareError(x, y);
-
-        auto grad = Gradient::reverseTopologicalOrder(fLoss);
-        Gradient::backward(grad);
-        int nclip = Gradient::clipGrad(grad, 1.5f);
-        model.update(stepSize);
-        Gradient::zeroGrad(grad);
-
-        loss = fLoss->getData();
-
-        if (j%100 == 0 || loss <= endloss) {
-            stepSize = stepSize*0.85;
-            std::cout << "Iteration : " << j << " ; Loss : " << fLoss->getData() << " ; lr : "<< stepSize;
-            std::cout << " ; nclip : " << nclip << std::endl;
-            // x.display();
-            // y.display();
+        if (epoch % 5 == 0){
+            stepSize = stepSize * 0.95;                             // lr decay
         }
-        j++;
+
+        float loss = 0;                                             // Loss of the epoch ; only for user
+
+        for(int i = 0 ; i < 16 ; ++i){                              // Iterate over all batches
+            Tensor batchInput = inputs.slice(16*i, 16*i + 16);      // Get a batch for input
+            Tensor batchTrue  = y.slice(16*i, 16*i + 16);           // Get a batch for ytrue
+
+            Tensor x = model.forward(batchInput);                   // model forward
+            auto fLoss = Losses::meanSquareError(x, batchTrue);     // Loss of the batch
+
+            auto grad = Gradient::reverseTopologicalOrder(fLoss);   // Get the computational graph (backward)
+            Gradient::backward(grad);                               // Perform backward propagation of gradient
+            int nclip = Gradient::clipGrad(grad, 1.5f);             // Clip gradient
+
+            model.update(stepSize);                                 // Update model weights (no optim yet)
+            Gradient::zeroGrad(grad);                               // Reset all the grad (avoid accumulate over multiple batch)
+            loss += fLoss->getData();                               // Increment epoch loss
+        }
+        std::cout << "Epoch : " << epoch << " ; Loss : " << loss / 16 << " ; lr : "<< stepSize << std::endl;
     }
+
+
 
     return 0;
 }
-
-// int main() {
-//     Tensor tensor = Tensor::ones({3, 4, 5});
-
-//     auto subtensor = Tensor(tensor.dim(), tensor.data());
-//     subtensor({0,0,0}) = Value::create(0);
-
-//     tensor.display();
-//     return 0;
-// }
-
-// int main() {
-//     Tensor tensor = Tensor::zeros({20});
-
-//     tensor.reshape({4, 5});
-
-//     auto subtensor = tensor[0];
-
-//     int size = subtensor.size();
-//     std::cout << "";
-//     for (auto& d : subtensor){
-//         d->setValue(1.0);
-//     }
-
-//     tensor.display();
-//     subtensor.display();
-
-//     return 0;
-// }
