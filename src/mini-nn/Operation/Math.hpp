@@ -26,6 +26,11 @@ namespace Math
     /// @return tensor
     Tensor pow(Tensor& tensor, int exponent);
 
+    /// @brief raise a tensor to a desired power (elementwise)
+    /// @param tensor
+    /// @return tensor
+    Tensor pow(Tensor& t1, Tensor& t2);
+
     /// @brief element-wise sum
     /// @param t1
     /// @param t2

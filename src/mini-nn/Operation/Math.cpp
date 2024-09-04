@@ -112,6 +112,14 @@ namespace Math
         return std::move(result);
     }
 
+    Tensor pow(Tensor& t1, Tensor& t2) {
+        Tensor result(t1.dim());
+        for (int i = 0; i < t1.size(); ++i) {
+            result.mat()[i] = pow(t1.mat()[i], t2.mat()[i]->getData());
+        }
+        return std::move(result);
+    }
+
     Tensor ewSum(Tensor& t1, Tensor& t2) {
         if (t1.size() != t2.size()) { // no need for equal dim, just need equal size
             throw std::invalid_argument("Tensor dimensions must match for element-wise sum.");
