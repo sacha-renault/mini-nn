@@ -1,8 +1,5 @@
 #pragma once
 #include "Optimizer.hpp"
-#include "../Operation/Gradient.hpp"
-
-
 
 
 namespace Optimizers // namespace name
@@ -23,20 +20,18 @@ namespace Optimizers // namespace name
         float beta1_;
         float beta2_;
         float epsilon_;
-        float lr_;
         int t_;
 
         void updateNode(AdamContainer& node);
     public:
         Adam(Model& model, float lr = 0.01, float beta1 = 0.9, float beta2 = 0.999, float epsilon = 1e-8);
-        virtual void setLearningRate(float lr) override { lr_ = lr; }
-        virtual float getLearningRate() override { return lr_; }
         virtual void update(ValRef &loss) override;
     };
 
     Adam::Adam(Model& model, float lr, float beta1, float beta2, float epsilon)
-        : beta1_(beta1), beta2_(beta2), epsilon_(epsilon), lr_(lr), t_(1)
+        : beta1_(beta1), beta2_(beta2), epsilon_(epsilon), t_(1)
     {
+        lr_ = lr; // from optimizer
         for(auto& val : model.getParameters()) {
             params_.push_back(AdamContainer(val));
         }
