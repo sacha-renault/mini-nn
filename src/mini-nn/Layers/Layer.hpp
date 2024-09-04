@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include "../Values/Value.hpp"
-#include "../Values/Parameter.hpp"
 #include "../Tensor/Tensor.hpp"
 
 class Layer {

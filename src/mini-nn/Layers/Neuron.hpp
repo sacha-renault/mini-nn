@@ -2,8 +2,9 @@
 #include <vector>
 #include <memory>
 #include <random>
-#include "../Values/Value.hpp" 
-#include "../Tensor/Tensor.hpp" 
+#include "../Values/Value.hpp"
+#include "../Values/NodesTypes.hpp"
+#include "../Tensor/Tensor.hpp"
 #include "../Operation/Math.hpp"
 
 class Neuron {
@@ -16,7 +17,7 @@ private:
 
 public:
     // Constructor
-    Neuron(int num_inputs) : 
+    Neuron(int num_inputs) :
             output_(Value::create(0.0f))  {
         std::random_device rd;
         std::mt19937 gen(rd());
@@ -28,6 +29,12 @@ public:
 
         // Create the bias point
         bias_ = Value::create(dist(gen));  // Initialize bias
+
+        // Init types
+        bias_->setType(NodeTypes::BIAS);
+        for(auto& val : wi_) {
+            val->setType(NodeTypes::WEIGHT);
+        }
     }
 
     // Forward pass

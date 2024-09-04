@@ -6,20 +6,24 @@
 #include <functional>
 #include <string>
 #include <iostream>
+#include "NodesTypes.hpp"
 
 
 class Value : public std::enable_shared_from_this<Value> {
 protected:
     float data_;
     float grad_;
+    NodeTypes type_;
     std::unordered_set<std::shared_ptr<Value>> children_; // Children of the current Value in the computational graph
     std::vector<std::function<void()>> backwards_;                      // Backward function for backpropagation
     std::vector<std::function<void()>> forwards_;                       // forward function for optimized computation
 
 public:
+
     // Constructor
     Value(float data)
-        : data_(data), grad_(0.0f), children_(), backwards_(), forwards_() { }
+        : data_(data), grad_(0.0f), children_(),
+          backwards_(), forwards_(), type_(NodeTypes::ANY) { }
 
     static std::shared_ptr<Value> create(float data) {
         return std::make_shared<Value>(data);
@@ -39,6 +43,8 @@ public:
 
     // Setter for value
     void setValue(float val) { data_ = val; }
+    void setType(NodeTypes type) { type_ = type; }
+    NodeTypes getType() { return type_; }
 
     // Set the backward function
     void addBackward(std::function<void()> func) { backwards_.push_back(func); }

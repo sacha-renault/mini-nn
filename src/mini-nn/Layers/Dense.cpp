@@ -19,7 +19,7 @@ namespace Layers
         int total_weights = 0;
         for (auto& neuron : neurons_) {
             total_weights += neuron.getWeights().size();  // Count total number of weights
-            total_weights += 1; // also as a bias
+            total_weights += 1; // also has a bias
         }
 
         // Create a Tensor to hold all the parameters
