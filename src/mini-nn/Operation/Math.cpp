@@ -174,7 +174,7 @@ namespace Math
 
         // Iterate over each element in the tensor
         for (int i = 0; i < t1.size(); ++i) {
-            auto val = t1({i});
+            auto val = t1.mat()[i];
             float absValue = std::fabs(val->getData());
             ValRef out = Value::create(absValue);
             out->addChild(val);
@@ -189,7 +189,7 @@ namespace Math
                 float newValue = std::fabs(val->getData());
                 out->setValue(newValue);
             });
-            result({i}) = out;
+            result.mat()[i] = out;
         }
         return std::move(result);
     }
