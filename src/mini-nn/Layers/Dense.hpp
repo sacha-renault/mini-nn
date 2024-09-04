@@ -4,8 +4,7 @@
 #include "Layer.hpp"
 #include "Neuron.hpp"
 #include "../Tensor/Tensor.hpp"
-#include "../Activations/ActivationWrapper.hpp"
-#include "../Activations/ActivationFunction.hpp"
+#include "../Activations/Activation.hpp"
 
 using namespace Activations;
 
@@ -14,7 +13,7 @@ namespace Layers {
     private:
         std::vector<Neuron> neurons_;  // Neurons in the dense layer
         Tensor outputs_;  // Shared pointers to the outputs of the layer
-        ActivationWrapper func_;
+        ActivationFunction func_;
 
     public:
         // Constructor
@@ -25,21 +24,16 @@ namespace Layers {
             }
         }
 
-        Dense(int num_inputs, int num_outputs, TensorWiseActivation func)
+        Dense(int num_inputs, int num_outputs, ActivationFunction func)
             :  Dense(num_inputs, num_outputs) {
-                func_ = ActivationWrapper(std::make_shared<TensorWiseActivation>(func));
-            }
-
-        Dense(int num_inputs, int num_outputs, ElementWiseActivation func)
-            :  Dense(num_inputs, num_outputs) {
-                func_ = ActivationWrapper(std::make_shared<ElementWiseActivation>(func));
+                func_ = func;
             }
 
         // Static factory method
         static std::shared_ptr<Dense> create(int num_inputs, int num_outputs){
             return std::make_shared<Dense>(num_inputs, num_outputs);
         }
-        static std::shared_ptr<Dense> create(int num_inputs, int num_outputs, ElementWiseActivation func){
+        static std::shared_ptr<Dense> create(int num_inputs, int num_outputs, ActivationFunction func){
             return std::make_shared<Dense>(num_inputs, num_outputs, func);
         }
 

@@ -7,7 +7,9 @@ namespace Layers
             outputs_({i}) = neurons_[i].forward(inputs);  // Store each neuron's output
         }
 
-        outputs_ = func_(outputs_);
+        if (func_) {
+            outputs_ = func_(outputs_);
+        }
 
         return outputs_;
     }

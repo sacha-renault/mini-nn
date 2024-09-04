@@ -1,7 +1,6 @@
 #include <iostream>
 #include "src/mini-nn/Values/Value.hpp"
-#include "src/mini-nn/Activations/ActivationFunction.hpp"
-#include "src/mini-nn/Activations/Static.hpp"
+#include "src/mini-nn/Activations/Activation.hpp"
 #include "src/mini-nn/Layers/Neuron.hpp"
 #include "src/mini-nn/Layers/Dense.hpp"
 #include "src/mini-nn/Tensor/Tensor.hpp"

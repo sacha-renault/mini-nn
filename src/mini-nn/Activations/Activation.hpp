@@ -1,24 +1,19 @@
 #pragma once
-#include "ActivationFunction.hpp"
+#include <functional>
+#include "../Tensor/Tensor.hpp"
 
 namespace Activations {
-    // ReLU activation function
-    static ElementWiseActivation ReLU(
-        [](float x) { return std::max(0.0f, x); },           // Forward: ReLU
-        [](float x) { return x > 0.0f ? 1.0f : 0.0f; }       // Backward: ReLU derivative
-    );
+    // delegate typedef
+    using ActivationFunction = std::function<Tensor(Tensor&)>;
+    using ewActivationFunction = std::function<float(float)>;
+    using twActivationFunction = std::function<float(std::vector<float>)>;
 
-    // Tanh activation function
-    static ElementWiseActivation Tanh(
-        [](float x) { return std::tanh(x); },                // Forward: Tanh
-        [](float x) { return 1.0f - x * x; }  // Backward: Tanh derivative
-    );
+    Tensor _ewActivation(Tensor& input, ewActivationFunction forward, ewActivationFunction backward);
 
-    // Sigmoid activation function
-    static ElementWiseActivation Sigmoid(
-        [](float x) { return 1.0f / (1.0f + std::exp(-x)); },  // Forward: Sigmoid
-        [](float x) { return x * (1.0f - x); }  // Backward: Sigmoid derivative
-    );
+    // ReLU
+    Tensor ReLU(Tensor& input);
+    Tensor Tanh(Tensor& input);
+    Tensor Sigmoid(Tensor& input);
 
     // Softmax activation function
     // static TensorWiseActivation Softmax(
@@ -26,12 +21,12 @@ namespace Activations {
     //     [](const std::vector<float>& x) -> std::vector<float> {
     //         std::vector<float> exp_x(x.size());
     //         float max_val = *std::max_element(x.begin(), x.end());
-            
+
     //         // Compute exponentials for numerical stability
     //         for (size_t i = 0; i < x.size(); ++i) {
     //             exp_x[i] = std::exp(x[i] - max_val);
     //         }
-            
+
     //         float sum_exp_x = std::accumulate(exp_x.begin(), exp_x.end(), 0.0f);
 
     //         // Normalize to get probabilities
@@ -41,7 +36,7 @@ namespace Activations {
 
     //         return exp_x;
     //     },
-        
+
     //     // Backward function
     //     [](const std::vector<float>& softmax_output) -> std::vector<float> {
     //         std::vector<float> grad(softmax_output.size());
