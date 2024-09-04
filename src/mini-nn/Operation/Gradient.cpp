@@ -77,4 +77,14 @@ namespace Gradient
 
         return clipped;
     }
+
+    void noiseGrad(std::vector<std::shared_ptr<Value>>& gradientNodes, float ratio) {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::normal_distribution<float> dis(0.0f, 0.01f);
+        for (auto& node : gradientNodes) {
+            float noise = dis(gen);
+            node->accumulateGrad(noise / ratio);
+        }
+    }
 } // namespace Gradient

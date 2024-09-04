@@ -46,5 +46,11 @@ namespace Gradient
     /// @return number of node where gradient was clipped
     int clipGrad(std::vector<std::shared_ptr<Value>>& gradientNodes, float max = 1.0f);
 
+    /// @brief add noise ~N(0, 0.01) to gradient (to avoid local minima) / ratio
+    /// @param gradientNodes
+    /// @param ratio to divide the result of normal noise
+    /// @return number of node where gradient was clipped
+    void noiseGrad(std::vector<std::shared_ptr<Value>>& gradientNodes, float ratio);
+
 } // namespace Gradient
 
