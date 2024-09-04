@@ -23,14 +23,14 @@ std::shared_ptr<Value> Value::applyOperator(const std::shared_ptr<Value>& other,
 }
 
 void Value::backward() {
-    if (backward_) {
-        backward_();
+    for (auto& b_func : backwards_){
+        b_func();
     }
 }
 
 void Value::forward() {
-    if (forward_) {
-        forward_();
+    for (auto& f_func : forwards_){
+        f_func();
     }
 }
 
@@ -88,8 +88,8 @@ std::shared_ptr<Value> Value::div(const std::shared_ptr<Value>& other) {
 
 
 void Value::derefGraph() {
-    backward_ = nullptr; // deref the lambda function and free memory
-    forward_ = nullptr; // deref the lambda function and free memory
+    backwards_.clear(); // deref the lambda function and free memory
+    forwards_.clear(); // deref the lambda function and free memory
     zeroGrad();
     children_.clear();  // clean all refs to child, since it's share_ptr,
                         // any shared_ptr that doesn't have owner will be free
