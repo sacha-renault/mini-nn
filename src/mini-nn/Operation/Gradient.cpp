@@ -30,7 +30,7 @@ namespace Gradient
             auto rootNode = Math::reduceSum(output);
             return reverseTopologicalOrder(rootNode);
         } else {
-            return reverseTopologicalOrder(output({0}));
+            return reverseTopologicalOrder(output.mat()[0]);
         }
     }
 
