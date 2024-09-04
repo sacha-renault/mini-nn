@@ -168,4 +168,29 @@ namespace Math
         }
         return std::move(result);
     }
+
+    Tensor abs(Tensor& t1) {
+        Tensor result(t1.dim());
+
+        // Iterate over each element in the tensor
+        for (int i = 0; i < t1.size(); ++i) {
+            auto val = t1({i});
+            float absValue = std::fabs(val->getData());
+            ValRef out = Value::create(absValue);
+            out->addChild(val);
+
+            out->addBackward([out, val]() {
+                float gradient = out->getGrad();
+                float gradInput = (val->getData() >= 0) ? gradient : -gradient;
+                val->accumulateGrad(gradInput);
+            });
+
+            out->addForward([out, val]() {
+                float newValue = std::fabs(val->getData());
+                out->setValue(newValue);
+            });
+            result({i}) = out;
+        }
+        return std::move(result);
+    }
 } // namespace Math

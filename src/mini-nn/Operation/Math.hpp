@@ -48,6 +48,12 @@ namespace Math
     /// @param t1
     /// @param t2
     /// @return division of tensor elementwise
-    Tensor ewDic(Tensor& t1, Tensor& t2);
+    Tensor ewDiv(Tensor& t1, Tensor& t2);
+
+    /// @brief element-wise division
+    /// @param t1
+    /// @param t2
+    /// @return division of tensor elementwise
+    Tensor abs(Tensor& t1);
 
 } // namespace Math
