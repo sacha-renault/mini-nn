@@ -41,8 +41,8 @@ public:
     void setValue(float val) { data_ = val; }
 
     // Set the backward function
-    void setBackward(std::function<void()> func) { backwards_.push_back(func); }
-    void setForward(std::function<void()> func) { forwards_.push_back(func); }
+    void addBackward(std::function<void()> func) { backwards_.push_back(func); }
+    void addForward(std::function<void()> func) { forwards_.push_back(func); }
 
     // Add a child
     void addChild(const std::shared_ptr<Value>& child) {

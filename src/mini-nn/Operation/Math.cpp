@@ -20,14 +20,14 @@ namespace Math
         }
 
         // Set the backward function to distribute the gradient to all children
-        result->setBackward([result, tensor]() {
+        result->addBackward([result, tensor]() {
             float upperNodeGradient = result->getGrad();
             for (auto& node : tensor) {
                 node->accumulateGrad(upperNodeGradient);
             }
         });
 
-        result->setForward([result, tensor]() {
+        result->addForward([result, tensor]() {
             // Sum all the data from the other values
             float total = 0.0f;
 
@@ -60,14 +60,14 @@ namespace Math
         }
 
         // Set the backward function to distribute the gradient to all children
-        result->setBackward([result, tensor]() {
+        result->addBackward([result, tensor]() {
             float upperNodeGradient = result->getGrad();
             for (auto& node : tensor) {
                 node->accumulateGrad(upperNodeGradient);
             }
         });
 
-        tensor.mat()[0]->setForward([result, tensor]() {
+        tensor.mat()[0]->addForward([result, tensor]() {
             // Sum all the data from the other values
             float total = 0.0f;
 
@@ -90,12 +90,12 @@ namespace Math
 
         // Backward pass (for autograd)
         result->addChild(base);
-        result->setBackward([base, base_value, exponent, result]() {
+        result->addBackward([base, base_value, exponent, result]() {
             float gradient = exponent * std::pow(base_value, exponent - 1);
             base->accumulateGrad(gradient * result->getGrad());
         });
 
-        base->setForward([base, result, exponent]() {
+        base->addForward([base, result, exponent]() {
             float floatResult = std::pow(base->getData(), exponent);
             result->setValue(floatResult);
         });

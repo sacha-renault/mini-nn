@@ -10,10 +10,21 @@ namespace Activations {
 
     Tensor _ewActivation(Tensor& input, ewActivationFunction forward, ewActivationFunction backward);
 
-    // ReLU
+    /// @brief Activation ReLU
+    /// @param input Tensor
     Tensor ReLU(Tensor& input);
+
+    /// @brief Activation Tanh
+    /// @param input Tensor
     Tensor Tanh(Tensor& input);
+
+    /// @brief Activation Sigmoid
+    /// @param input Tensor
     Tensor Sigmoid(Tensor& input);
+
+    /// @brief Activation Softmax
+    /// @param input Tensor
+    Tensor Softmax(Tensor& input);
 
     // Softmax activation function
     // static TensorWiseActivation Softmax(

@@ -6,14 +6,12 @@
 #include "../Tensor/Tensor.hpp"
 #include "../Activations/Activation.hpp"
 
-using namespace Activations;
-
 namespace Layers {
     class Dense : public Layer { // one dim layer
     private:
         std::vector<Neuron> neurons_;  // Neurons in the dense layer
         Tensor outputs_;  // Shared pointers to the outputs of the layer
-        ActivationFunction func_;
+        Activations::ActivationFunction func_;
 
     public:
         // Constructor
@@ -24,7 +22,7 @@ namespace Layers {
             }
         }
 
-        Dense(int num_inputs, int num_outputs, ActivationFunction func)
+        Dense(int num_inputs, int num_outputs, Activations::ActivationFunction func)
             :  Dense(num_inputs, num_outputs) {
                 func_ = func;
             }
@@ -33,7 +31,7 @@ namespace Layers {
         static std::shared_ptr<Dense> create(int num_inputs, int num_outputs){
             return std::make_shared<Dense>(num_inputs, num_outputs);
         }
-        static std::shared_ptr<Dense> create(int num_inputs, int num_outputs, ActivationFunction func){
+        static std::shared_ptr<Dense> create(int num_inputs, int num_outputs, Activations::ActivationFunction func){
             return std::make_shared<Dense>(num_inputs, num_outputs, func);
         }
 

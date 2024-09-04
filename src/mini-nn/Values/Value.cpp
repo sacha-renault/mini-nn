@@ -37,12 +37,12 @@ void Value::forward() {
 std::shared_ptr<Value> Value::add(const std::shared_ptr<Value>& other){
     std::shared_ptr<Value> out = applyOperator(other, [](float a, float b) { return a + b; });
 
-    out->setBackward([out, other, this]() {
+    out->addBackward([out, other, this]() {
         other->accumulateGrad(out->getGrad());
         this->accumulateGrad(out->getGrad());
     });
 
-    out->setForward([out, other, this]() {
+    out->addForward([out, other, this]() {
         out->setValue(this->getData() + other->getData());
     });
 
@@ -51,11 +51,11 @@ std::shared_ptr<Value> Value::add(const std::shared_ptr<Value>& other){
 
 std::shared_ptr<Value> Value::times(const std::shared_ptr<Value>& other){
     std::shared_ptr<Value> out = applyOperator(other, [](float a, float b) { return a * b; });
-    out->setBackward([out, other, this]() {
+    out->addBackward([out, other, this]() {
         other->accumulateGrad(out->getGrad() * this->data_);
         this->accumulateGrad(out->getGrad() * other->getData());
     });
-    out->setForward([out, other, this]() {
+    out->addForward([out, other, this]() {
         out->setValue(this->getData() * other->getData());
     });
     return out;
@@ -63,11 +63,11 @@ std::shared_ptr<Value> Value::times(const std::shared_ptr<Value>& other){
 
 std::shared_ptr<Value> Value::sub(const std::shared_ptr<Value>& other) {
     std::shared_ptr<Value> out = applyOperator(other, [](float a, float b) { return a - b; });
-    out->setBackward([out, other, this]() {
+    out->addBackward([out, other, this]() {
         other->accumulateGrad(-out->getGrad()); // Negative gradient for subtraction
         this->accumulateGrad(out->getGrad());
     });
-    out->setForward([out, other, this]() {
+    out->addForward([out, other, this]() {
         out->setValue(this->getData() - other->getData());
     });
     return out;
@@ -75,11 +75,11 @@ std::shared_ptr<Value> Value::sub(const std::shared_ptr<Value>& other) {
 
 std::shared_ptr<Value> Value::div(const std::shared_ptr<Value>& other) {
     std::shared_ptr<Value> out = applyOperator(other, [](float a, float b) { return a / b; });
-    out->setBackward([out, other, this]() {
+    out->addBackward([out, other, this]() {
         other->accumulateGrad(-out->getGrad() * this->data_ / (other->getData() * other->getData()));
         this->accumulateGrad(out->getGrad() / other->getData());
     });
-    out->setForward([out, other, this]() {
+    out->addForward([out, other, this]() {
         out->setValue(this->getData() / other->getData());
     });
     return out;

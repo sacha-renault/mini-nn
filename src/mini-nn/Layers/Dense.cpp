@@ -14,17 +14,6 @@ namespace Layers
         return outputs_;
     }
 
-    // void Dense::backward() {
-    //     // Ensure output is a single element
-    //     if (outputs_.dim()[0] == 1) {
-    //         outputs_({0});
-    //     }
-    //     else { // Case there isn't a single element, we sum first to start backprop on a single node
-    //         auto node = Math::reduceSum(outputs_);
-    //         node->backward();
-    //     }
-    // }
-
     Tensor Dense::getParameters() {
         // First calculate the number of weight
         int total_weights = 0;
