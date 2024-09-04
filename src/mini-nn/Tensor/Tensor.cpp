@@ -219,6 +219,14 @@ void Tensor::assign(int index, Tensor& tensor) {
     }
 }
 
+std::vector<float> Tensor::getValues() {
+    std::vector<float> values(total_size_);
+    for (auto& val : data_) {
+        values.push_back(val->getData());
+    }
+    return std::move(values);
+}
+
 // Static method to create a tensor filled with ones
 Tensor Tensor::ones(const std::vector<int>& dims) {
     Tensor tensor(dims);

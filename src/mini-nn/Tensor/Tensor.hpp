@@ -49,6 +49,8 @@ public:
 
     void assign(int index, Tensor& tensor);
 
+    std::vector<float> getValues();
+
 
     // FOR ITERATOR
 
