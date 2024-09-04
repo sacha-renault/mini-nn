@@ -4,4 +4,5 @@
 namespace Losses
 {
     ValRef meanSquareError(Tensor& pred, Tensor& real);
+    ValRef meanAbsoluteError(Tensor& pred, Tensor& real);
 } // namespace Losses
