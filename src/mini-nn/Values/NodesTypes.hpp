@@ -4,5 +4,5 @@
 
 // A Parameter is a special type of Value that can be updated.
 enum NodeTypes {
-    ANY, WEIGHT, BIAS
+    ANY, WEIGHT, BIAS, OUTPUT
 };

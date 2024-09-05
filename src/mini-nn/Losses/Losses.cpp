@@ -1,5 +1,6 @@
 #include "Losses.hpp"
 #include "../Operation/Math.hpp"
+#include <iostream>
 
 namespace Losses
 {

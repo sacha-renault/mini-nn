@@ -24,6 +24,9 @@ Tensor::Tensor(const std::vector<int>& dims, std::vector<std::shared_ptr<Value>>
 int Tensor::computeIndex(const std::vector<int>& indices) const {
     int index = 0;
     int multiplier = 1;
+    if (indices.size() != this->rank()) {
+        throw std::runtime_error("Cannot get the index with indices size != rank of the tensor");
+    }
     for (int i = dimensions_.size() - 1; i >= 0; --i) {
         index += indices[i] * multiplier;
         multiplier *= dimensions_[i];
@@ -220,7 +223,7 @@ void Tensor::assign(int index, Tensor& tensor) {
 }
 
 std::vector<float> Tensor::getValues() {
-    std::vector<float> values(total_size_);
+    std::vector<float> values;
     for (auto& val : data_) {
         values.push_back(val->getData());
     }

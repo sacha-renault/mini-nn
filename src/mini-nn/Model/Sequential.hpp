@@ -43,11 +43,12 @@ public:
             throw std::runtime_error("input of rank 1 cannot be batched input");
         }
 
-        if (!graphBuilded) {
-            int batchSize = input.dim()[0];
-            graphBuilded = true;
-            input_ = input; // TODO, real copy of tensor input
+        // get bs
+        int batchSize = input.dim()[0];
 
+        if (!graphBuilded) {
+            graphBuilded = true;
+            input_ = Tensor::zeros(input[0].dim());
             std::vector<int> outshape;
             outshape.push_back(batchSize);
             for (auto val : layers_[layers_.size() - 1]->shape()) {
@@ -55,23 +56,35 @@ public:
             }
             output_ = Tensor::zeros(outshape);
 
+            Tensor x = input_;
+            for (auto& layer : layers_) {
+                x = layer->forward(x);
+            }
+            
             for (int i = 0 ; i < batchSize ; ++i){
-                Tensor x = input_[i];
-                for (auto& layer : layers_) {
-                    x = layer->forward(x);
-                }
-                output_.assign(i, x);
+                auto cloned = Math::cloneWithGraph(x);
+                output_.assign(i, cloned);
             }
 
-            computeGraph_ = Gradient::reverseTopologicalOrder(output_);
+            // build graph from x, we can just call forward on output afterward
+            computeGraph_ = Gradient::reverseTopologicalOrder(x);
         }
 
-        else {
-            input_.setValueLike(input);
-            for (int i = computeGraph_.size() - 1 ; i >= 0 ; --i) {
-                computeGraph_[i]->forward();
+        for (int i = 0 ; i < batchSize ; ++i) {
+            auto singleInput = input[i];
+            input_.setValueLike(singleInput);
+
+            // call compute graph (from input to x)
+            for (int j = computeGraph_.size() - 1 ; j >= 0 ; --j) {
+                computeGraph_[j]->forward();
+            }
+
+            // compute x to batch output
+            for(auto& val : output_[i]) {
+                val->forward();
             }
         }
+        auto v = output_.getValues();
         return output_;
     }
 };

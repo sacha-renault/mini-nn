@@ -62,21 +62,22 @@ namespace Math
         // Set the backward function to distribute the gradient to all children
         result->addBackward([result, tensor]() {
             float upperNodeGradient = result->getGrad();
+            int size = tensor.size();
             for (auto& node : tensor) {
-                node->accumulateGrad(upperNodeGradient);
+                node->accumulateGrad(upperNodeGradient / size);
             }
         });
 
-        tensor.mat()[0]->addForward([result, tensor]() {
+        result->addForward([result, tensor]() {
             // Sum all the data from the other values
             float total = 0.0f;
-
+            int size = tensor.size();
             // Collect all the data and children references
             for (auto& val : tensor) {
                 total += val->getData();
             }
 
-            result->setValue(total / tensor.size());
+            result->setValue(total / size);
         });
         return std::move(result);
     }
@@ -85,7 +86,6 @@ namespace Math
     std::shared_ptr<Value> pow(std::shared_ptr<Value> base, int exponent) {
         float base_value = base->getData();
         float pow_value = std::pow(base_value, exponent);
-
         auto result = Value::create(pow_value);
 
         // Backward pass (for autograd)
@@ -95,7 +95,7 @@ namespace Math
             base->accumulateGrad(gradient * result->getGrad());
         });
 
-        base->addForward([base, result, exponent]() {
+        result->addForward([base, result, exponent]() {
             float floatResult = std::pow(base->getData(), exponent);
             result->setValue(floatResult);
         });
@@ -196,6 +196,24 @@ namespace Math
             out->addForward([out, val]() {
                 float newValue = std::fabs(val->getData());
                 out->setValue(newValue);
+            });
+            result.mat()[i] = out;
+        }
+        return std::move(result);
+    }
+
+    Tensor cloneWithGraph(Tensor& t1) {
+        Tensor result(t1.dim());
+        int size = t1.size();
+        for(int i = 0 ; i < size ; ++i) {
+            auto val = t1.mat()[i];
+            auto out = Value::create(val->getData());
+            out->addChild(val);
+            out->addForward([val, out]() {
+                out->setValue(val->getData());
+            });
+            out->addBackward([val, out]() {
+                val->accumulateGrad(out->getGrad());
             });
             result.mat()[i] = out;
         }
