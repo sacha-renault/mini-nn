@@ -14,70 +14,25 @@ private:
     Tensor output_;                                 // Using shared_ptr for output
 
 public:
-    // Constructor
-    Neuron(int num_inputs) {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
+    /// @brief Neuron construct
+    /// @param num_inputs number of input that will be linked to a single output
+    Neuron(int num_inputs);
 
-        // Initialize weights
-        wi_ = Tensor::randn({ num_inputs });
+    /// @brief Forward input into a neuron, should be called once at graph initialization
+    // or only after computation graph was reset on every element.
+    /// @param xi input of dim (batch_size, num_inputs)
+    /// @return output tensor, shape : (batch_size, )
+    Tensor& forward(Tensor& xi);
 
-        // Create the bias point
-        bias_ = Value::create(dist(gen));  // Initialize bias
-
-        // Init types
-        bias_->setType(NodeTypes::BIAS);
-        for(auto& val : wi_) {
-            val->setType(NodeTypes::WEIGHT);
-        }
-    }
-
-    // Forward pass
-    Tensor& forward(Tensor& xi) {
-        // Assert that Tensor has rank 2 (batch size, input dimension)
-        if (xi.rank() != 2) {
-            throw std::invalid_argument("Input tensor must be rank 2 for batched input (batch_size, input_dim).");
-        }
-
-        // Extract batch size and input dimension
-        int batchSize = xi.dim()[0];
-        int inputDim = xi.dim()[1];
-
-        // Assert dimensions are compatible
-        if (inputDim != wi_.dim()[0]) {
-            throw std::invalid_argument("Input size must match the number of weights.");
-        }
-
-        // Initialize the output tensor to hold the neuron outputs for each example in the batch
-        Tensor outputs({ batchSize });
-
-        // Compute the weighted inputs for each data in batch
-        for (int i = 0; i < batchSize; ++i) {
-            // Compute the weighted sum for the i-th example
-            Tensor xi_batch = xi[i];
-            Tensor xiwi_batch({ inputDim });
-
-            for (int j = 0; j < inputDim; ++j) {
-                xiwi_batch({j}) = xi_batch({j})->times(wi_({j}));
-            }
-
-            // Sum all weighted inputs and add bias for this batch element
-            auto xnwn_batch = Math::reduceSum(xiwi_batch);
-            auto output_batch = xnwn_batch->add(bias_);  // Add bias
-
-            // Store the output for this batch element
-            outputs({i}) = output_batch;
-        }
-
-        // Store the batch outputs
-        output_ = outputs;
-
-        return output_;
-    }
-
-    // Getters
+    /// @brief Get the wi_ weights
+    /// @return tensor representing the weights of the neuron
     Tensor& getWeights() { return wi_; }
+
+    /// @brief Get the bias param of the neuron
+    /// @return bias
     std::shared_ptr<Value>& getBias() { return bias_; }
+
+    /// @brief get the output of the last graph execution
+    /// @return output tensor of shape (batch_size, )
     Tensor& getOutput() { return output_; }
 };

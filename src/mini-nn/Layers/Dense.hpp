@@ -14,32 +14,27 @@ namespace Layers {
         Activations::ActivationFunction func_;
 
     public:
-        // Constructor
-        Dense(int num_inputs, int num_outputs)
-            : func_(), outputs_({num_outputs}) {
-            for (int i = 0; i < num_outputs; ++i) {
-                neurons_.emplace_back(Neuron(num_inputs));  // Initialize neurons with the number of inputs
-            }
-        }
+        /// @brief Constructor
+        Dense(int num_inputs, int num_outputs);
 
-        Dense(int num_inputs, int num_outputs, Activations::ActivationFunction func)
-            :  Dense(num_inputs, num_outputs) {
-                func_ = func;
-            }
+        /// @brief Constructor
+        Dense(int num_inputs, int num_outputs, Activations::ActivationFunction func);
 
-        // Static factory method
+        /// @brief Static factory method
         static std::shared_ptr<Dense> create(int num_inputs, int num_outputs){
             return std::make_shared<Dense>(num_inputs, num_outputs);
         }
+
+        /// @brief Static factory method
         static std::shared_ptr<Dense> create(int num_inputs, int num_outputs, Activations::ActivationFunction func){
             return std::make_shared<Dense>(num_inputs, num_outputs, func);
         }
 
-        // Forward pass for the dense layer
+        /// @brief Forward input into a neuron, should be called once at graph initialization
+        // or only after computation graph was reset on every element.
+        /// @param inputs inputs of dim (batch_size, num_inputs)
+        /// @return output tensor, shape : (batch_size, num_outputs)
         const Tensor& forward(Tensor& inputs) override;
-
-        /// @brief Backward pass for the dense layer
-        // void backward() override;
 
 
         /// @brief Get all parameters (weights) from all neurons in the layer

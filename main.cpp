@@ -15,7 +15,7 @@
 
 
 int main(){
-    float stepSize = 1e-2; // i.e. lr
+    float stepSize = 5e-3; // i.e. lr
     float endloss = 1e-5;
     int bs = 16;
     int num_b = 16;

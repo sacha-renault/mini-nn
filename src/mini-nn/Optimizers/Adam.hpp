@@ -4,25 +4,25 @@
 
 namespace Optimizers // namespace name
 {
-    struct AdamContainer
+    struct ParamMomentumState
     {
         ValRef node;
         float m; // 1st moment
         float s; // second moment
-        AdamContainer(ValRef& n) : node(n), m(0), s(0) { }
+        ParamMomentumState(ValRef& n) : node(n), m(0), s(0) { }
     };
 
 
     class Adam : public Optimizer
     {
     private:
-        std::vector<AdamContainer> params_;
+        std::vector<ParamMomentumState> params_;
         float beta1_;
         float beta2_;
         float epsilon_;
         int t_;
 
-        void updateNode(AdamContainer& node);
+        void updateNode(ParamMomentumState& node);
     public:
         Adam(Model& model, float lr = 0.01, float beta1 = 0.9, float beta2 = 0.999, float epsilon = 1e-8);
         virtual void update(ValRef &loss) override;
@@ -33,7 +33,7 @@ namespace Optimizers // namespace name
     {
         lr_ = lr; // from optimizer
         for(auto& val : model.getParameters()) {
-            params_.push_back(AdamContainer(val));
+            params_.push_back(ParamMomentumState(val));
         }
     }
 
@@ -50,7 +50,7 @@ namespace Optimizers // namespace name
         ++t_;
     }
 
-    void Adam::updateNode(AdamContainer& container) {
+    void Adam::updateNode(ParamMomentumState& container) {
         float grad = container.node->getGrad();
         if (container.node->getType() == NodeTypes::BIAS) {
             container.m = beta1_ * container.m + (1 - beta1_) * grad;

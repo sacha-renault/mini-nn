@@ -2,6 +2,18 @@
 
 namespace Layers
 {
+    Dense::Dense(int num_inputs, int num_outputs)
+        : func_(), outputs_({num_outputs}) {
+        for (int i = 0; i < num_outputs; ++i) {
+            neurons_.emplace_back(Neuron(num_inputs));  // Initialize neurons with the number of inputs
+        }
+    }
+
+    Dense::Dense(int num_inputs, int num_outputs, Activations::ActivationFunction func)
+        :  Dense(num_inputs, num_outputs) {
+        func_ = func;
+    }
+
     const Tensor& Dense::forward(Tensor& inputs) {
         // Assuming inputs is of shape [batch_size, input_dim]
         int batchSize = inputs.dim()[0];
@@ -13,9 +25,7 @@ namespace Layers
         // Iterate over each neuron
         int i = 0;
         for (auto& neuron : neurons_) {
-            // Perform a dot product of inputs with the neuron's weights and add the bias
-            // Assuming neurons_[i].forward(inputs) is implemented to handle batch input
-            // If not, we might need to modify that function as well
+            // perform forward on each neuron
             Tensor neuronOutput = neuron.forward(inputs);  // Output shape is [batchSize, 1]
 
             // Assign the output of this neuron to the i-th column of the outputs_ tensor
