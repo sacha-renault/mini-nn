@@ -2,11 +2,7 @@
 
 Sequential::Sequential() : layers_(), graphBuilded(false) { }
 
-void Sequential::addLayer(const std::shared_ptr<Layer>& layer) {
-    layers_.push_back(layer);
-}
-
-void Sequential::addLayer(std::shared_ptr<Layer>&& layer) {
+void Sequential::addLayer(std::shared_ptr<Layer> layer) {
     layers_.push_back(std::move(layer));
 }
 

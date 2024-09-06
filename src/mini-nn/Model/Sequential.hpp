@@ -16,8 +16,7 @@ public:
 
     /// @brief Push back a layer into the layers list by ref
     /// @param layer 
-    void addLayer(const std::shared_ptr<Layer>& layer);
-    void addLayer(std::shared_ptr<Layer>&& layer);
+    void addLayer(const std::shared_ptr<Layer> layer);
 
     /// @brief Get all parameters of the model
     /// @return params in the model
