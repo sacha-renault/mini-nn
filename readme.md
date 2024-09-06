@@ -7,50 +7,65 @@
 ## Done or todo
 
 ### Computation
+
 - [x] Backpropagation.
 - [x] Forward in a graph.s
 
 ### Dense & Model
+
 - [ ] Basic model
 - [x] Sequential
 - [x] Dense (FCC)
 - [ ] Convolution Layer (FCC)
 
 ### Activation
-- [ ] Remake activation behavior (it sucks rn).
+
 - [x] Tanh
-- [x] ReLU
-- [x] Sigmoid
-- [ ] Softmax (currently broken).
+- [-] ReLU & Variants
+  - [x] ReLU
+  - [ ] swish
+  - [ ] LReLU
+  - [ ] PReLU
+  - [ ] ELU
+  - [ ] SELU
+- [x] Sigmoid.
+- [x] Softmax.
 
 ### Gradient
+
 - [x] Get graph (topo order)
 - [x] Backward propagation
 - [x] Grad reset
 - [x] Gradient clipping
-- [ ] Gradient noize injection.
+- [-] Gradient noize injection.
 - [ ] More things on gradient ...
 
 ### Math
 
 #### Reduce Ops
+
 - [x] sum
 - [x] mean
 - [ ] add reduce on axis.
 
 #### Elementwise ops
+
 - [x] Add
 - [x] Sub
 - [x] Mul
 - [x] Div
 - [x] Pow (float exp)
-- [ ] Pow (Tensor exp)
+- [x] Pow (Tensor exp)
 
 #### Losses
-- [ ] MSE
-- [ ] MAE
-- [ ] BCE
+
+- [x] MSE
+- [x] MAE
+- [-] BCE : bugged asf
 - [ ] CCE
 
 ### Optimizer
-- [ ] Learn optimizer!!!
+
+- [x] SGD
+- [x] Adam
+- [ ] Adagrad
