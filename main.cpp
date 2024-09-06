@@ -15,29 +15,30 @@
 
 
 int main(){
-    float stepSize = 2e-2; // i.e. lr
+    float stepSize = 1e-2; // i.e. lr
     float endloss = 1e-5;
-    int bs = 1;
-    int num_b = 10;
+    int bs = 16;
+    int num_b = 16;
     int num_data = bs*num_b;
-    int input_data_size = 10;
+    int input_data_size = 32;
     int output_data_size = 1;
-    int num_epoch = 200;
+    int num_epoch = 500;
 
     // seed
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     auto model = Sequential();
-    model.addLayer(Layers::Dense::create(input_data_size, 4, Activations::ReLU));
-    model.addLayer(Layers::Dense::create(4, 4, Activations::ReLU));
-    model.addLayer(Layers::Dense::create(4, 4, Activations::ReLU));
-    model.addLayer(Layers::Dense::create(4, output_data_size, Activations::Sigmoid));
+    model.addLayer(Layers::Dense::create(input_data_size, 16, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(16, 16, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(16, 8, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(8, 4, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(4, output_data_size, Activations::Tanh));
 
     // set optim
     auto opt = Optimizers::Adam(model, stepSize);
 
 
-    Tensor inputs = Tensor::random({num_data, input_data_size}, 0, 1);     // Init a full random tensor
+    Tensor inputs = Tensor::randn({num_data, input_data_size});     // Init a full random tensor
     // Tensor y({num_data, output_data_size});                         // init a ytrue tensor (empty)
     Tensor y({ num_data });                         // init a ytrue tensor (empty)
 
@@ -45,7 +46,7 @@ int main(){
         // for (int j = 0 ; j < output_data_size ; ++j) {
         //     y({i, j}) = Value::create((std::rand() % 2 == 0) ? -1 : 1);
         // }
-        y({ i }) = Value::create((std::rand() % 2 == 0) ? 0 : 1);
+        y({ i }) = Value::create((std::rand() % 2 == 0) ? -1 : 1);
     }
 
 
@@ -69,24 +70,33 @@ int main(){
             float iloss = fLoss->getData();
             loss += iloss;
 
-            // std::cout << "ypred : ";
-            // x.display();
-            // std::cout << "ytrue : ";
-            // batchTrue.display();
-            // std::cout << "Loss : " << fLoss->getData() << std::endl;
-
 
                                           // Increment epoch loss
-
             std::cout << "Epoch : " << epoch << " ; batch : " << i + 1 << " / ";
             std::cout << num_b << " ; Loss : " << loss / (i + 1)<<std::flush;
             std::cout << " ; lr : " << opt.getLearningRate() <<std::flush;
             std::cout << "\r" <<std::flush;
-        }
+            
 
-        // if (loss < 0.2) {
-        //     break;
-        // }
+            // std::cout << std::endl;
+            // for(int b = 0; b < bs ; ++b){
+            //     std::cout << "Value for batch " << i << "," << b << " : ";
+            //     for (auto& val : batchInput[b].getValues()) {
+            //         std::cout << val << " ";
+            //     }
+            //     std::cout << std::endl;
+            // }            
+
+            // std::cout << " ypred: ";
+            // for (auto& val : x.getValues()) {
+            //     std::cout << val << " ";
+            // }
+            // std::cout << " ; ytrue: ";
+            // for (auto& val : batchTrue.getValues()) {
+            //     std::cout << val << " ";
+            // }
+            // std::cout << "; " << std::endl; 
+        }
         std::cout << std::endl;
     }
 

@@ -43,48 +43,33 @@ public:
             throw std::runtime_error("input of rank 1 cannot be batched input");
         }
 
-        // get bs
+        // Batch processing: input is [batch_size, ...]
         int batchSize = input.dim()[0];
 
+        // Only build the graph once
         if (!graphBuilded) {
             graphBuilded = true;
-            input_ = Tensor::zeros(input[0].dim());
-            std::vector<int> outshape;
-            outshape.push_back(batchSize);
-            for (auto val : layers_[layers_.size() - 1]->shape()) {
-                outshape.push_back(val);
-            }
-            output_ = Tensor::zeros(outshape);
 
+            input_ = Tensor::zeros(input.dim());
+
+            // Define the computation for a single input, but process the whole batch
             Tensor x = input_;
             for (auto& layer : layers_) {
-                x = layer->forward(x);
-            }
-            
-            for (int i = 0 ; i < batchSize ; ++i){
-                auto cloned = Math::cloneWithGraph(x);
-                output_.assign(i, cloned);
+                x = layer->forward(x);  // Each layer handles batched inputs
             }
 
-            // build graph from x, we can just call forward on output afterward
-            computeGraph_ = Gradient::reverseTopologicalOrder(x);
+            output_ = x;  // Final output is batched
+            computeGraph_ = Gradient::reverseTopologicalOrder(x);  // Single graph
         }
 
-        for (int i = 0 ; i < batchSize ; ++i) {
-            auto singleInput = input[i];
-            input_.setValueLike(singleInput);
+        // assign new values to input
+        input_.setValueLike(input);
 
-            // call compute graph (from input to x)
-            for (int j = computeGraph_.size() - 1 ; j >= 0 ; --j) {
-                computeGraph_[j]->forward();
-            }
-
-            // compute x to batch output
-            for(auto& val : output_[i]) {
-                val->forward();
-            }
+        // No need to loop over each batch element; process the entire batch at once
+        for (int j = computeGraph_.size() - 1 ; j >= 0 ; --j) {
+            computeGraph_[j]->forward();  // Forward pass for the entire batch
         }
-        auto v = output_.getValues();
+
         return output_;
     }
 };

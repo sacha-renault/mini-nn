@@ -9,23 +9,19 @@
 
 class Neuron {
 private:
-    Tensor wi_;  // Using shared_ptr for weights
-    Tensor xiwi_;     // Using shared_ptr for xiwi output
-    std::shared_ptr<Value> bias_;                  // Using shared_ptr for bias
-    std::shared_ptr<Value> xnwn_;                  // result of the sum of all xiwi
-    std::shared_ptr<Value> output_;                // Using shared_ptr for output
+    Tensor wi_;                                     // Using shared_ptr for weights
+    std::shared_ptr<Value> bias_;                   // Using shared_ptr for bias
+    Tensor output_;                                 // Using shared_ptr for output
 
 public:
     // Constructor
-    Neuron(int num_inputs) :
-            output_(Value::create(0.0f))  {
+    Neuron(int num_inputs) {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
 
         // Initialize weights
         wi_ = Tensor::randn({ num_inputs });
-        xiwi_ = Tensor::zeros({ num_inputs });
 
         // Create the bias point
         bias_ = Value::create(dist(gen));  // Initialize bias
@@ -38,39 +34,50 @@ public:
     }
 
     // Forward pass
-    std::shared_ptr<Value>& forward(const Tensor& xi) {
-        // First assert that Tensor is rank one
-        if (xi.rank() != 1) {
-            throw std::invalid_argument("Input dim must be 1 for Neuron.");
+    Tensor& forward(Tensor& xi) {
+        // Assert that Tensor has rank 2 (batch size, input dimension)
+        if (xi.rank() != 2) {
+            throw std::invalid_argument("Input tensor must be rank 2 for batched input (batch_size, input_dim).");
         }
 
-        // Assert dim are equal
-        if (xi.dim() != wi_.dim()) {
+        // Extract batch size and input dimension
+        int batchSize = xi.dim()[0];
+        int inputDim = xi.dim()[1];
+
+        // Assert dimensions are compatible
+        if (inputDim != wi_.dim()[0]) {
             throw std::invalid_argument("Input size must match the number of weights.");
         }
 
-        // Compute the weighted inputs  by iterating over axis 0;
-        for (int i = 0; i < xi.dim()[0]; ++i) {
-            xiwi_({i}) = xi({i})->times(wi_({i}));
+        // Initialize the output tensor to hold the neuron outputs for each example in the batch
+        Tensor outputs({ batchSize });
+
+        // Compute the weighted inputs for each data in batch
+        for (int i = 0; i < batchSize; ++i) {
+            // Compute the weighted sum for the i-th example
+            Tensor xi_batch = xi[i];
+            Tensor xiwi_batch({ inputDim });
+
+            for (int j = 0; j < inputDim; ++j) {
+                xiwi_batch({j}) = xi_batch({j})->times(wi_({j}));
+            }
+
+            // Sum all weighted inputs and add bias for this batch element
+            auto xnwn_batch = Math::reduceSum(xiwi_batch);
+            auto output_batch = xnwn_batch->add(bias_);  // Add bias
+
+            // Store the output for this batch element
+            outputs({i}) = output_batch;
         }
 
-        // Sum all weighted inputs and add bias
-        xnwn_ = Math::reduceSum(xiwi_);
+        // Store the batch outputs
+        output_ = outputs;
 
-        // Add bias
-        output_ = xnwn_->add(bias_);  // Set output
         return output_;
     }
-
-    // Backward pass
-    // void backward() {
-    //     if (output_) {
-    //         output_->backward();  // Backward pass for the output
-    //     }
-    // }
 
     // Getters
     Tensor& getWeights() { return wi_; }
     std::shared_ptr<Value>& getBias() { return bias_; }
-    std::shared_ptr<Value>& getOutput() { return output_; }
+    Tensor& getOutput() { return output_; }
 };
