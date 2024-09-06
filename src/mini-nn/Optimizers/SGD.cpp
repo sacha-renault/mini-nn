@@ -8,7 +8,7 @@ namespace Optimizers
         params = model.getParameters();
     }
 
-    void SGD::update(ValRef &loss)
+    void SGD::update(std::shared_ptr<Value> &loss)
     {
         auto grad = Gradient::reverseTopologicalOrder(loss);
         Gradient::backward(grad);

@@ -4,27 +4,27 @@
 
 namespace Losses
 {
-    ValRef meanSquareError(Tensor& pred, Tensor& real) {
+    std::shared_ptr<Value> meanSquareError(Tensor& pred, Tensor& real) {
         Tensor x = Math::ewSub(pred, real);
         x = Math::pow(x, 2);
-        ValRef loss = Math::reduceMean(x);
+        std::shared_ptr<Value> loss = Math::reduceMean(x);
         return std::move(loss);
     }
 
-    ValRef meanAbsoluteError(Tensor& pred, Tensor& real) {
+    std::shared_ptr<Value> meanAbsoluteError(Tensor& pred, Tensor& real) {
         Tensor x = Math::ewSub(pred, real);
         x = Math::abs(x);
-        ValRef loss = Math::reduceMean(x);
+        std::shared_ptr<Value> loss = Math::reduceMean(x);
         return std::move(loss);
     }
 
-    ValRef binaryCrossEntropy(Tensor& pred, Tensor& real) {
+    std::shared_ptr<Value> binaryCrossEntropy(Tensor& pred, Tensor& real) {
         if (pred.dim() != real.dim()) {
             throw std::invalid_argument("Predicted and real tensors must have the same dimensions for Binary Cross-Entropy loss.");
         }
 
         float epsilon = 1e-12;  // Small value to avoid log(0)
-        ValRef loss = Value::create(0.0f);  // Initialize the loss value
+        std::shared_ptr<Value> loss = Value::create(0.0f);  // Initialize the loss value
 
         for (int i = 0; i < pred.size(); ++i) {
             auto p = pred.mat()[i];

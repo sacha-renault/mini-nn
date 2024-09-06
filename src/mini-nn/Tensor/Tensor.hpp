@@ -28,6 +28,8 @@ public:
 
     Tensor slice(int start, int end, int axis = 0);
 
+    Tensor copy();
+
     void fill(float value);
 
     const std::vector<std::shared_ptr<Value>>& mat() const;

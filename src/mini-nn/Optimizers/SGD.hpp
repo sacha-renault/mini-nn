@@ -6,11 +6,11 @@ namespace Optimizers
     class SGD : public Optimizer
     {
     private:
-        std::vector<ValRef> params;
+        std::vector<std::shared_ptr<Value>> params;
 
     public:
         SGD(Model& model, float lr);
-        virtual void update(ValRef &loss) override;
+        virtual void update(std::shared_ptr<Value> &loss) override;
     };
 } // namespace Optimizers
 

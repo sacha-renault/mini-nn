@@ -184,7 +184,7 @@ namespace Math
         for (int i = 0; i < t1.size(); ++i) {
             auto val = t1.mat()[i];
             float absValue = std::fabs(val->getData());
-            ValRef out = Value::create(absValue);
+            std::shared_ptr<Value> out = Value::create(absValue);
             out->addChild(val);
 
             out->addBackward([out, val]() {

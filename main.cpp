@@ -65,7 +65,7 @@ int main(){
             Tensor batchTrue  = y.slice(bs*i, bs*i + bs);           // Get a batch for ytrue
 
             Tensor x = model.forward(batchInput);                   // model forward
-            ValRef fLoss = Losses::meanSquareError(x, batchTrue);   // Loss of the batch
+            std::shared_ptr<Value> fLoss = Losses::meanSquareError(x, batchTrue);   // Loss of the batch
             opt.update(fLoss);
             float iloss = fLoss->getData();
             loss += iloss;
@@ -114,7 +114,7 @@ int main(){
 //     y({0, 0})->setValue(1);
 
 
-//     ValRef loss = Losses::binaryCrossEntropy(x, y);
+//     std::shared_ptr<Value> loss = Losses::binaryCrossEntropy(x, y);
 
 //     return 0;
 // }

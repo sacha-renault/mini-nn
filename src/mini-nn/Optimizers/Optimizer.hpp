@@ -9,7 +9,7 @@ protected:
     float lr_;
 
 public:
-    virtual void update(ValRef &loss) = 0;
+    virtual void update(std::shared_ptr<Value> &loss) = 0;
     virtual void setLearningRate(float lr) { lr_ = lr; }
     virtual float getLearningRate() { return lr_; }
 };

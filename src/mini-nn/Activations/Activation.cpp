@@ -9,7 +9,7 @@ namespace Activations
         for (auto& val : input) {                               // Iterate over all input
             float x = val->getData();
             float y = forward(x);
-            ValRef out = Value::create(y);                      // Create new node for graph
+            std::shared_ptr<Value> out = Value::create(y);                      // Create new node for graph
             out->addChild(val);                                 // Add child for new node
 
             out->addBackward([out, val, backward]() {
@@ -76,7 +76,7 @@ namespace Activations
                 auto val = inputSlice({j});
                 float softmaxValue = std::exp(val->getData()) / expSum;
 
-                ValRef out = Value::create(softmaxValue);  // Create a new node for the graph
+                std::shared_ptr<Value> out = Value::create(softmaxValue);  // Create a new node for the graph
                 out->addChild(val);  // Add the current value as a child
 
                 out->addBackward([out, val, softmaxValue]() {

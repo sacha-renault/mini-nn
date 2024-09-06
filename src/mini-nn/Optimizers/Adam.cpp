@@ -11,7 +11,7 @@ namespace Optimizers
         }
     }
 
-    void Adam::update(ValRef &loss)
+    void Adam::update(std::shared_ptr<Value> &loss)
     {
         auto grad = Gradient::reverseTopologicalOrder(loss);
         Gradient::backward(grad);

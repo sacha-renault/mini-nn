@@ -222,6 +222,13 @@ void Tensor::assign(int index, Tensor& tensor) {
     }
 }
 
+Tensor Tensor::copy() {
+    // create a new tensor, that points to the same values
+    // Same tensor, just a different container
+    auto data_cpy = data_; // copy of the vector, but still point to same values
+    return std::move(Tensor(dimensions_, data_cpy));
+}
+
 std::vector<float> Tensor::getValues() {
     std::vector<float> values;
     for (auto& val : data_) {
