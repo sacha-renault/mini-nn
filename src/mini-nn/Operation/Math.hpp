@@ -66,4 +66,9 @@ namespace Math
     /// @return same tensor on grpah (different ref)
     Tensor cloneWithGraph(Tensor& t1);
 
+    /// @brief element-wise log
+    /// @param t1 
+    /// @return 
+    Tensor log(Tensor& t1);
+
 } // namespace Math

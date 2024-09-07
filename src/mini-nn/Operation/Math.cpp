@@ -202,6 +202,32 @@ namespace Math
         return std::move(result);
     }
 
+    Tensor log(Tensor& t1) {
+        Tensor result(t1.dim());
+
+        // Iterate over each element in the tensor
+        for (int i = 0; i < t1.size(); ++i) {
+            auto val = t1.mat()[i];
+            float logValue = std::log(val->getData());
+            std::shared_ptr<Value> out = Value::create(logValue);
+            out->addChild(val);
+
+            out->addBackward([out, val]() {
+                float gradient = out->getGrad();
+                float gradInput = gradient / val->getData();
+                val->accumulateGrad(gradInput);
+            });
+
+            out->addForward([out, val]() {
+                float newValue = std::log(val->getData());
+                out->setValue(newValue);
+            });
+
+            result.mat()[i] = out;
+        }
+        return std::move(result);
+    }
+
     Tensor cloneWithGraph(Tensor& t1) {
         Tensor result(t1.dim());
         int size = t1.size();
