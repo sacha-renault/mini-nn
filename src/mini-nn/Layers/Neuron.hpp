@@ -6,6 +6,7 @@
 #include "../Values/NodesTypes.hpp"
 #include "../Tensor/Tensor.hpp"
 #include "../Operation/Math.hpp"
+#include "../Values/NodeOperator.hpp"
 
 class Neuron {
 private:

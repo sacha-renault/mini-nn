@@ -5,10 +5,8 @@
 namespace Activations {
     // delegate typedef
     using ActivationFunction = std::function<Tensor(Tensor&)>;
-    using ewActivationFunction = std::function<float(float)>;
-    using twActivationFunction = std::function<float(std::vector<float>)>;
 
-    Tensor _ewActivation(Tensor& input, ewActivationFunction forward, ewActivationFunction backward);
+    Tensor _ewActivation(Tensor& input, std::function<float(float)> forward, std::function<float(float, float)> backward);
 
     /// @brief Activation ReLU
     /// @param input Tensor
