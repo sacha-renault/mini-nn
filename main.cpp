@@ -17,37 +17,37 @@
 int main(){
     float stepSize = 5e-3; // i.e. lr
     float endloss = 1e-5;
-    int bs = 16;
-    int num_b = 16;
+    int bs = 4;
+    int num_b = 1;
     int num_data = bs*num_b;
-    int input_data_size = 32;
+    int input_data_size = 4;
     int output_data_size = 1;
-    int num_epoch = 500;
+    int num_epoch = 100;
 
     // seed
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     auto model = Sequential();
-    model.addLayer(Layers::Dense::create(input_data_size, 16, Activations::Tanh));
-    model.addLayer(Layers::Dense::create(16, 16, Activations::Tanh));
-    model.addLayer(Layers::Dense::create(16, 8, Activations::Tanh));
-    model.addLayer(Layers::Dense::create(8, 4, Activations::Tanh));
-    model.addLayer(Layers::Dense::create(4, output_data_size, Activations::Tanh));
+    // model.addLayer(Layers::Dense::create(input_data_size, 16, Activations::Tanh));
+    // model.addLayer(Layers::Dense::create(16, 16, Activations::Tanh));
+    // model.addLayer(Layers::Dense::create(16, 8, Activations::Tanh));
+    // model.addLayer(Layers::Dense::create(8, 4, Activations::Tanh));
+    model.addLayer(Layers::Dense::create(4, output_data_size));
 
     // set optim
-    auto opt = Optimizers::Adam(model, stepSize);
+    auto opt = Optimizers::SGD(model, stepSize);
 
 
     Tensor inputs = Tensor::randn({num_data, input_data_size});     // Init a full random tensor
     // Tensor y({num_data, output_data_size});                         // init a ytrue tensor (empty)
-    Tensor y({ num_data });                         // init a ytrue tensor (empty)
+    Tensor y = Tensor::randn({ num_data });                         // init a ytrue tensor (empty)
 
-    for (int i = 0 ; i < num_data ; ++i) {
-        // for (int j = 0 ; j < output_data_size ; ++j) {
-        //     y({i, j}) = Value::create((std::rand() % 2 == 0) ? -1 : 1);
-        // }
-        y({ i }) = Value::create((std::rand() % 2 == 0) ? -1 : 1);
-    }
+    // for (int i = 0 ; i < num_data ; ++i) {
+    //     // for (int j = 0 ; j < output_data_size ; ++j) {
+    //     //     y({i, j}) = Value::create((std::rand() % 2 == 0) ? -1 : 1);
+    //     // }
+    //     y({ i }) = Value::create((std::rand() % 2 == 0) ? -1 : 1);
+    // }
 
 
     std::cout << "Start training " <<std::endl;
@@ -76,7 +76,7 @@ int main(){
             std::cout << num_b << " ; Loss : " << loss / (i + 1)<<std::flush;
             std::cout << " ; lr : " << opt.getLearningRate() <<std::flush;
             std::cout << "\r" <<std::flush;
-            
+
 
             // std::cout << std::endl;
             // for(int b = 0; b < bs ; ++b){
@@ -85,8 +85,7 @@ int main(){
             //         std::cout << val << " ";
             //     }
             //     std::cout << std::endl;
-            // }            
-
+            // }
             // std::cout << " ypred: ";
             // for (auto& val : x.getValues()) {
             //     std::cout << val << " ";
@@ -95,7 +94,12 @@ int main(){
             // for (auto& val : batchTrue.getValues()) {
             //     std::cout << val << " ";
             // }
-            // std::cout << "; " << std::endl; 
+            // std::cout << "; " << std::endl;
+            // auto grad = Gradient::reverseTopologicalOrder(fLoss);
+            // Gradient::backward(grad);
+            // for (auto& g : grad) {
+            //     std::cout << g->getGrad() << " ";
+            // }
         }
         std::cout << std::endl;
     }
