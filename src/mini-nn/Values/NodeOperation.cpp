@@ -68,8 +68,13 @@ namespace NodeOperation {
 
     void Sub::backward(const std::vector<std::shared_ptr<Value>>& children, std::shared_ptr<Value> output) {
         float parentGrad = output->getGrad();
-        children[0]->accumulateGrad(-parentGrad);
-        children[1]->accumulateGrad(parentGrad);
+        children[0]->accumulateGrad(parentGrad);
+        children[1]->accumulateGrad(-parentGrad);
+
+        // out->addBackward([out, other, this]() {
+        //     other->accumulateGrad(-out->getGrad()); // Negative gradient for subtraction
+        //     this->accumulateGrad(out->getGrad());
+        // });
     }
 
 
