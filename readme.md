@@ -13,21 +13,13 @@
 
 ### Dense & Model
 
-- [ ] Basic model
 - [x] Sequential
 - [x] Dense (FCC)
-- [ ] Convolution Layer (FCC)
 
 ### Activation
 
 - [x] Tanh
-- [-] ReLU & Variants
-  - [x] ReLU
-  - [ ] swish
-  - [ ] LReLU
-  - [ ] PReLU
-  - [ ] ELU
-  - [ ] SELU
+- [x] ReLU
 - [x] Sigmoid.
 - [x] Softmax.
 
@@ -38,7 +30,6 @@
 - [x] Grad reset
 - [x] Gradient clipping
 - [-] Gradient noize injection.
-- [ ] More things on gradient ...
 
 ### Math
 
@@ -46,7 +37,6 @@
 
 - [x] sum
 - [x] mean
-- [ ] add reduce on axis.
 
 #### Elementwise ops
 
@@ -61,11 +51,8 @@
 
 - [x] MSE
 - [x] MAE
-- [-] BCE : bugged asf
-- [ ] CCE
 
 ### Optimizer
 
 - [x] SGD
 - [x] Adam
-- [ ] Adagrad
