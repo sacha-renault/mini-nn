@@ -43,12 +43,12 @@ Tensor& Neuron::forward(Tensor& xi) {
         Tensor xiwi_batch({ inputDim });
 
         for (int j = 0; j < inputDim; ++j) {
-            xiwi_batch({j}) = xi_batch({j})->times(wi_({j}));
+            xiwi_batch({j}) = xi_batch({j}) * wi_({j});
         }
 
         // Sum all weighted inputs and add bias for this batch element
         auto xnwn_batch = Math::reduceSum(xiwi_batch);
-        auto output_batch = xnwn_batch->add(bias_);  // Add bias
+        auto output_batch = xnwn_batch + bias_;  // Add bias
 
         // Store the output for this batch element
         outputs({i}) = output_batch;
