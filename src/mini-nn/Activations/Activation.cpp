@@ -22,8 +22,8 @@ namespace Activations
         auto f = [](float x) {
             return std::max(0.0f, x);
         };
-        auto b = [](float y) {
-            return y > 0.0f ? 1.0f : 0.0f;
+        auto b = [](float x) {
+            return x > 0.0f ? 1.0f : 0.0f;
         };
         return _ewActivation(input, f, b);
     }
@@ -32,7 +32,8 @@ namespace Activations
         auto f = [](float x) {
             return std::tanh(x);
         };
-        auto b = [](float y) {
+        auto b = [](float x) {
+            float y = std::tanh(x);
             return (1.0f - y * y);
         };
         return _ewActivation(input, f, b);

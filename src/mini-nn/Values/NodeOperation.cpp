@@ -114,7 +114,7 @@ namespace NodeOperation {
         if (children.size() != 1) {
             throw std::runtime_error("operation Function1 must have exactly 1 child");
         }
-        float localGradient = backward_(output->getData());
+        float localGradient = backward_(children[0]->getData());
         children[0]->accumulateGrad(output->getGrad() * localGradient);
     }
 
