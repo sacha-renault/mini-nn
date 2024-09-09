@@ -90,8 +90,8 @@ namespace Math
 
         // Backward pass (for autograd)
         result->addChild(base);
-        result->addBackward([base, base_value, exponent, result]() {
-            float gradient = exponent * std::pow(base_value, exponent - 1);
+        result->addBackward([base, exponent, result]() {
+            float gradient = exponent * std::pow(base->getData(), exponent - 1);
             base->accumulateGrad(gradient * result->getGrad());
         });
 
