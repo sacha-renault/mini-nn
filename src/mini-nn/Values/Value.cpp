@@ -8,88 +8,19 @@ std::string Value::toString() const {
     return rpr;
 }
 
-std::shared_ptr<Value> Value::applyOperator(const std::shared_ptr<Value>& other, std::function<float(float, float)> op_func) {
-    // Compute the new data value
-    float newData = op_func(data_, other->getData());
-
-    // Create a new Value object
-    auto result = std::make_shared<Value>(newData);
-
-    // Add the current object and `other` as children
-    result->addChild(shared_from_this());
-    result->addChild(other);
-
-    return result;
-}
-
 void Value::backward() {
-    for (auto& b_func : backwards_){
-        b_func();
+    if (operation_) {
+        operation_->backward(children_, shared_from_this());
     }
 }
 
 void Value::forward() {
-    for (auto& f_func : forwards_){
-        f_func();
+    if (operation_){
+        operation_->forward(children_, shared_from_this());
     }
 }
 
-std::shared_ptr<Value> Value::add(const std::shared_ptr<Value>& other){
-    std::shared_ptr<Value> out = applyOperator(other, [](float a, float b) { return a + b; });
-
-    out->addBackward([out, other, this]() {
-        other->accumulateGrad(out->getGrad());
-        this->accumulateGrad(out->getGrad());
-    });
-
-    out->addForward([out, other, this]() {
-        out->setValue(this->getData() + other->getData());
-    });
-
-    return out;
-}
-
-std::shared_ptr<Value> Value::times(const std::shared_ptr<Value>& other){
-    std::shared_ptr<Value> out = applyOperator(other, [](float a, float b) { return a * b; });
-    out->addBackward([out, other, this]() {
-        other->accumulateGrad(out->getGrad() * this->data_);
-        this->accumulateGrad(out->getGrad() * other->getData());
-    });
-    out->addForward([out, other, this]() {
-        out->setValue(this->getData() * other->getData());
-    });
-    return out;
-}
-
-std::shared_ptr<Value> Value::sub(const std::shared_ptr<Value>& other) {
-    std::shared_ptr<Value> out = applyOperator(other, [](float a, float b) { return a - b; });
-    out->addBackward([out, other, this]() {
-        other->accumulateGrad(-out->getGrad()); // Negative gradient for subtraction
-        this->accumulateGrad(out->getGrad());
-    });
-    out->addForward([out, other, this]() {
-        out->setValue(this->getData() - other->getData());
-    });
-    return out;
-}
-
-std::shared_ptr<Value> Value::div(const std::shared_ptr<Value>& other) {
-    std::shared_ptr<Value> out = applyOperator(other, [](float a, float b) { return a / b; });
-    out->addBackward([out, other, this]() {
-        other->accumulateGrad(-out->getGrad() * this->data_ / (other->getData() * other->getData()));
-        this->accumulateGrad(out->getGrad() / other->getData());
-    });
-    out->addForward([out, other, this]() {
-        out->setValue(this->getData() / other->getData());
-    });
-    return out;
-}
-
-
-
 void Value::derefGraph() {
-    backwards_.clear(); // deref the lambda function and free memory
-    forwards_.clear(); // deref the lambda function and free memory
     zeroGrad();
     children_.clear();  // clean all refs to child, since it's share_ptr,
                         // any shared_ptr that doesn't have owner will be free

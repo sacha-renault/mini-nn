@@ -1,4 +1,6 @@
 #include "Math.hpp"
+#include "../Values/NodeOperator.hpp"
+#include "../Values/NodeOperation.hpp"
 
 namespace Math
 {
@@ -12,33 +14,14 @@ namespace Math
         }
 
         // Create a new Value object for the sum with the collected children
-        auto result = Value::create(total);
+        auto result = Value::create(total, std::make_unique<NodeOperation::Add>());
 
         // add other as childs
         for (const auto& val : tensor) {
             result->addChild(val);
         }
 
-        // Set the backward function to distribute the gradient to all children
-        result->addBackward([result, tensor]() {
-            float upperNodeGradient = result->getGrad();
-            for (auto& node : tensor) {
-                node->accumulateGrad(upperNodeGradient);
-            }
-        });
-
-        result->addForward([result, tensor]() {
-            // Sum all the data from the other values
-            float total = 0.0f;
-
-            // Collect all the data and children references
-            for (auto& val : tensor) {
-                total += val->getData();
-            }
-
-            result->setValue(total);
-        });
-        return std::move(result);
+        return result;
     }
 
 
@@ -52,55 +35,33 @@ namespace Math
         }
 
         // Create a new Value object for the sum with the collected children
-        auto result = Value::create(total / tensor.size());
+        auto result = Value::create(total / tensor.size(), std::make_unique<NodeOperation::Avg>());
 
         // add other as childs
         for (auto& val : tensor) {
             result->addChild(val);
         }
-
-        // Set the backward function to distribute the gradient to all children
-        result->addBackward([result, tensor]() {
-            float upperNodeGradient = result->getGrad();
-            int size = tensor.size();
-            for (auto& node : tensor) {
-                node->accumulateGrad(upperNodeGradient / size);
-            }
-        });
-
-        result->addForward([result, tensor]() {
-            // Sum all the data from the other values
-            float total = 0.0f;
-            int size = tensor.size();
-            // Collect all the data and children references
-            for (auto& val : tensor) {
-                total += val->getData();
-            }
-
-            result->setValue(total / size);
-        });
-        return std::move(result);
+        return result;
     }
 
 
     std::shared_ptr<Value> pow(std::shared_ptr<Value> base, int exponent) {
         float base_value = base->getData();
         float pow_value = std::pow(base_value, exponent);
-        auto result = Value::create(pow_value);
+
+        std::shared_ptr<Value> result = Value::create(pow_value, std::make_unique<NodeOperation::Function1>(
+            [exponent](float x) {
+                return std::pow(x, exponent);
+            },
+            [exponent](float y) {
+                float partialGradient = exponent * std::pow(y, exponent - 1);
+                return partialGradient;
+            }
+        ));
 
         // Backward pass (for autograd)
         result->addChild(base);
-        result->addBackward([base, base_value, exponent, result]() {
-            float gradient = exponent * std::pow(base_value, exponent - 1);
-            base->accumulateGrad(gradient * result->getGrad());
-        });
-
-        result->addForward([base, result, exponent]() {
-            float floatResult = std::pow(base->getData(), exponent);
-            result->setValue(floatResult);
-        });
-
-        return std::move(result);
+        return result;
     }
 
 
@@ -109,15 +70,7 @@ namespace Math
         for (int i = 0; i < tensor.size(); ++i) {
             result.mat()[i] = pow(tensor.mat()[i], exponent);
         }
-        return std::move(result);
-    }
-
-    Tensor pow(Tensor& t1, Tensor& t2) {
-        Tensor result(t1.dim());
-        for (int i = 0; i < t1.size(); ++i) {
-            result.mat()[i] = pow(t1.mat()[i], t2.mat()[i]->getData());
-        }
-        return std::move(result);
+        return result;
     }
 
     Tensor ewSum(Tensor& t1, Tensor& t2) {
@@ -127,11 +80,9 @@ namespace Math
 
         Tensor result(t1.dim());
         for (int i = 0; i < t1.size(); ++i) {
-            auto t1_elt = t1.mat()[i];
-            auto t2_elt = t2.mat()[i];
-            result.mat()[i] = t1_elt->add(t2_elt);
+            result.mat()[i] = t1.mat()[i] + t2.mat()[i];
         }
-        return std::move(result);
+        return result;
     }
 
     Tensor ewSub(Tensor& t1, Tensor& t2) {
@@ -141,12 +92,9 @@ namespace Math
 
         Tensor result(t1.dim());
         for (int i = 0; i < t1.size(); ++i) {
-            auto t1_elt = t1.mat()[i];
-            auto t2_elt = t2.mat()[i];
-            auto res = t1_elt->sub(t2_elt);
-            result.mat()[i] = res;
+            result.mat()[i] = t1.mat()[i] - t2.mat()[i];
         }
-        return std::move(result);
+        return result;
     }
 
     Tensor ewMul(Tensor& t1, Tensor& t2) {
@@ -156,11 +104,9 @@ namespace Math
 
         Tensor result(t1.dim());
         for (int i = 0; i < t1.size(); ++i) {
-            auto t1_elt = t1.mat()[i];
-            auto t2_elt = t2.mat()[i];
-            result.mat()[i] = t1_elt->times(t2_elt);
+            result.mat()[i] = t1.mat()[i] * t2.mat()[i];
         }
-        return std::move(result);
+        return result;
     }
 
     Tensor ewDiv(Tensor& t1, Tensor& t2) {
@@ -170,11 +116,9 @@ namespace Math
 
         Tensor result(t1.dim());
         for (int i = 0; i < t1.size(); ++i) {
-            auto t1_elt = t1.mat()[i];
-            auto t2_elt = t2.mat()[i];
-            result.mat()[i] = t1_elt->div(t2_elt);
+            result.mat()[i] = t1.mat()[i] / t2.mat()[i];
         }
-        return std::move(result);
+        return result;
     }
 
     Tensor abs(Tensor& t1) {
@@ -184,22 +128,23 @@ namespace Math
         for (int i = 0; i < t1.size(); ++i) {
             auto val = t1.mat()[i];
             float absValue = std::fabs(val->getData());
-            std::shared_ptr<Value> out = Value::create(absValue);
+            std::shared_ptr<Value> out = Value::create(absValue, std::make_unique<NodeOperation::Function1>(
+                [](float x) {
+                    return std::fabs(x);
+                },
+                [](float x) {
+                    if (x >= 0) {
+                        return 1.0f;
+                    } else {
+                        return -1.0f;
+                    }
+
+                }
+            ));
             out->addChild(val);
-
-            out->addBackward([out, val]() {
-                float gradient = out->getGrad();
-                float gradInput = (val->getData() >= 0) ? gradient : -gradient;
-                val->accumulateGrad(gradInput);
-            });
-
-            out->addForward([out, val]() {
-                float newValue = std::fabs(val->getData());
-                out->setValue(newValue);
-            });
             result.mat()[i] = out;
         }
-        return std::move(result);
+        return result;
     }
 
     Tensor log(Tensor& t1) {
@@ -209,40 +154,18 @@ namespace Math
         for (int i = 0; i < t1.size(); ++i) {
             auto val = t1.mat()[i];
             float logValue = std::log(val->getData());
-            std::shared_ptr<Value> out = Value::create(logValue);
+
+            std::shared_ptr<Value> out = Value::create(logValue, std::make_unique<NodeOperation::Function1>(
+                [](float x) {
+                    return std::log(x);
+                },
+                [](float x) {
+                    return 1.0f / x;
+                }
+            ));
             out->addChild(val);
-
-            out->addBackward([out, val]() {
-                float gradient = out->getGrad();
-                float gradInput = gradient / val->getData();
-                val->accumulateGrad(gradInput);
-            });
-
-            out->addForward([out, val]() {
-                float newValue = std::log(val->getData());
-                out->setValue(newValue);
-            });
-
             result.mat()[i] = out;
         }
-        return std::move(result);
-    }
-
-    Tensor cloneWithGraph(Tensor& t1) {
-        Tensor result(t1.dim());
-        int size = t1.size();
-        for(int i = 0 ; i < size ; ++i) {
-            auto val = t1.mat()[i];
-            auto out = Value::create(val->getData());
-            out->addChild(val);
-            out->addForward([val, out]() {
-                out->setValue(val->getData());
-            });
-            out->addBackward([val, out]() {
-                val->accumulateGrad(out->getGrad());
-            });
-            result.mat()[i] = out;
-        }
-        return std::move(result);
+        return result;
     }
 } // namespace Math

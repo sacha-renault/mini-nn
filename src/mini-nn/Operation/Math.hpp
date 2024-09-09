@@ -61,14 +61,9 @@ namespace Math
     /// @return division of tensor elementwise
     Tensor abs(Tensor& t1);
 
-    /// @brief continue graph with same grad and value
-    /// @param t1
-    /// @return same tensor on grpah (different ref)
-    Tensor cloneWithGraph(Tensor& t1);
-
     /// @brief element-wise log
-    /// @param t1 
-    /// @return 
+    /// @param t1
+    /// @return
     Tensor log(Tensor& t1);
 
 } // namespace Math
