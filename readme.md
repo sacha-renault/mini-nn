@@ -56,3 +56,7 @@
 
 - [x] SGD
 - [x] Adam
+
+## Further learning (later)
+- How to vectorize operations
+- How to implement efficient tensor operation
